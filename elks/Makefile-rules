@@ -271,16 +271,14 @@ elks:
 #########################################################################
 # Standard commands.
 
-dokclean: $(CLEANDEP)
-	rm -fv *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
+dokclean: $(CLEANDEP) clean-files
 	@for DIR in */ ; do \
 		if [ -f "$$DIR/Makefile" -a "$$DIR" != "tools" ]; then \
 			${MAKE} -C "$$DIR" dokclean ; \
 		fi ; \
 	done
 
-doclean: $(CLEANDEP)
-	rm -fv *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
+doclean: $(CLEANDEP) clean-files
 #	@for FILE in *.s ; do \
 #		BASE=`basename "$$FILE" .s` ; \
 #		if [ -f "$$BASE.c" -o -f "$$BASE.S" ]; then \
@@ -293,6 +291,10 @@ doclean: $(CLEANDEP)
 			${MAKE} -C "$$DIR" doclean ; \
 		fi ; \
 	done
+
+.PHONE: clean-files
+clean-files:
+	rm -fv *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
 
 dodep:	$(DEPEND)
 	@if \ls *.c > /dev/null 2>&1 ; then \
