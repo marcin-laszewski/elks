@@ -245,18 +245,18 @@ endif
 #########################################################################
 # general construction rules
 
-.S.s: ;
+%.s: %.S ;
 
-.S.o:
+%.o: %.S
 	$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.tmp $<
 	$(AS) $(ASFLAGS) -o $*.o $*.tmp
 	$(RM) $*.tmp
 
-.s.o:
+%.o: %.s
 	$(AS) $(ASFLAGS) -o $*.o $<
 
 ifneq ($(USEBCC), N)
-.c.o:
+%.o: %.c
 	$(CC) $(CFLAGS) -c -o $*.o $<
 endif
 
