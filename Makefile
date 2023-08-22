@@ -7,9 +7,7 @@ include $(TOPDIR)/Make.defs
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: .config include/autoconf.h
-	$(MAKE) -C libc all
-	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' install
+all: .config include/autoconf.h libc-install
 	$(MAKE) -C elks all
 	$(MAKE) -C bootblocks all
 	$(MAKE) -C elkscmd all
@@ -21,9 +19,7 @@ endif
 kclean:
 	$(MAKE) -C elks kclean
 
-clean:
-	$(MAKE) -C libc clean
-	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' uninstall
+clean: libc-clean libc-uninstall
 	$(MAKE) -C elks clean
 	$(MAKE) -C bootblocks clean
 	$(MAKE) -C elkscmd clean
@@ -38,10 +34,24 @@ endif
 	    echo ;\
 	fi
 
-libc:
-	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' uninstall
-	$(MAKE) -C libc all
+.PHONY: libc-reinstall
+libc-reinstall: libc-uninstall libc-install
+
+.PHONY: libc-clean
+libc-clean:
+	$(MAKE) -C libc clean
+
+.PHONY: libc-install
+libc-install: libc
 	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' install
+
+.PHONY: libc-uninstall
+libc-uninstall:
+	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' uninstall
+
+.PHONY: libc
+libc:
+	$(MAKE) -C libc all
 
 elks/arch/i86/drivers/char/KeyMaps/config.in:
 	$(MAKE) -C elks/arch/i86/drivers/char/KeyMaps config.in
