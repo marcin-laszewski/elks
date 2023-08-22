@@ -33,13 +33,13 @@ LIB_OS=ELKS
 %.o: %.S
 	$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $*.tmp $<
 	$(AS) $(ASFLAGS) -o $*.o $*.tmp
-	rm -f $*.tmp
+	$(RM) $*.tmp
 
 ifdef MULTISUBDIR
 $(TOPDIR)/libc/build-ml/$(MULTISUBDIR)/%.o: %.S
 	$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $@.tmp $<
 	$(AS) $(ASFLAGS) -o $@ $@.tmp
-	rm -f $@.tmp
+	$(RM) $@.tmp
 endif
 
 %.o: %.s
