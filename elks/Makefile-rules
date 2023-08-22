@@ -250,7 +250,7 @@ endif
 .S.o:
 	$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.tmp $<
 	$(AS) $(ASFLAGS) -o $*.o $*.tmp
-	rm $*.tmp
+	$(RM) $*.tmp
 
 .s.o:
 	$(AS) $(ASFLAGS) -o $*.o $<
@@ -278,15 +278,15 @@ doclean: $(CLEANDEP) clean-files
 #	@for FILE in *.s ; do \
 #		BASE=`basename "$$FILE" .s` ; \
 #		if [ -f "$$BASE.c" -o -f "$$BASE.S" ]; then \
-#			echo rm -fv "$$FILE" ; \
-#			rm -fv "$$FILE" ; \
+#			echo $(RM) -v "$$FILE" ; \
+#			$(RM) -v "$$FILE" ; \
 #		fi ; \
 #	done
 	for DIR in $(dir $(wildcard */Makefile)); do $(MAKE) -C "$$DIR" $@; done
 
 .PHONE: clean-files
 clean-files:
-	rm -fv *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
+	$(RM) -v *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
 
 dodep:	$(DEPEND)
 	@if \ls *.c > /dev/null 2>&1 ; then \
@@ -349,7 +349,7 @@ dolint:
 				> "$${FILE}.lint" 2>&1 ; \
 		    fi ; \
 		    if [ $$? -eq 0 ]; then \
-			rm -f "$${FILE}.lint" ; \
+			$(RM) "$${FILE}.lint" ; \
 		    else \
 			cat "$${FILE}.lint" ; \
 		    fi ; \
@@ -393,7 +393,7 @@ mkdep:
 		echo -n 'Assigning dependencies: ' ; \
 		mv -fv make.tmp Makefile ; \
 	else \
-		rm -f make.tmp ; \
+		$(RM) make.tmp ; \
 	fi
 
 nodep:
@@ -402,7 +402,7 @@ nodep:
 		echo -n 'Removing dependencies: ' ; \
 		mv -fv make.tmp Makefile ; \
 	else \
-		rm -f make.tmp ; \
+		$(RM) make.tmp ; \
 	fi
 	@for DIR in */ ; do \
 		if [ -f "$$DIR/Makefile" ]; then \
