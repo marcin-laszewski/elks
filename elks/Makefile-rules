@@ -272,11 +272,7 @@ elks:
 # Standard commands.
 
 dokclean: $(CLEANDEP) clean-files
-	@for DIR in */ ; do \
-		if [ -f "$$DIR/Makefile" -a "$$DIR" != "tools" ]; then \
-			${MAKE} -C "$$DIR" dokclean ; \
-		fi ; \
-	done
+	for DIR in $(filter-out tools/,$(dir $(wildcard */Makefile))); do $(MAKE) -C "$$DIR" $@; done
 
 doclean: $(CLEANDEP) clean-files
 #	@for FILE in *.s ; do \
@@ -286,11 +282,7 @@ doclean: $(CLEANDEP) clean-files
 #			rm -fv "$$FILE" ; \
 #		fi ; \
 #	done
-	@for DIR in */ ; do \
-		if [ -f "$$DIR/Makefile" ]; then \
-			${MAKE} -C "$$DIR" doclean ; \
-		fi ; \
-	done
+	for DIR in $(dir $(wildcard */Makefile)); do $(MAKE) -C "$$DIR" $@; done
 
 .PHONE: clean-files
 clean-files:
