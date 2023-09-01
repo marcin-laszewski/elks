@@ -53,7 +53,7 @@ libc:
 	$(MAKE) -C libc all
 
 elks/arch/i86/drivers/char/KeyMaps/config.in:
-	$(MAKE) -C elks/arch/i86/drivers/char/KeyMaps config.in
+	$(MAKE) -C $(dir $@) $(notdir $@)
 
 kconfig:
 	$(MAKE) -C config all
