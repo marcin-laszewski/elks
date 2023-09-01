@@ -41,13 +41,12 @@ libc-reinstall: libc-uninstall libc-install
 libc-clean:
 	$(MAKE) -C libc clean
 
-.PHONY: libc-install
-libc-install: libc
-	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' install
+.PHONY: libc-install libc-uninstall
 
-.PHONY: libc-uninstall
-libc-uninstall:
-	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' uninstall
+libc-install: libc
+
+libc-install libc-uninstall:
+	$(MAKE) -C libc DESTDIR='$(TOPDIR)/cross' $(subst libc-,,$@)
 
 .PHONY: libc
 libc:
