@@ -168,10 +168,8 @@ drivers/net/net_drv.a:
 
 distdir:
 	mkdir -p $(DISTDIR)/arch/i86
-	(cd $(DISTDIR)/arch/i86 ; \
-		mkdir -p boot drivers kernel lib mm tools)
-	(cd $(DISTDIR)/arch/i86/drivers ; \
-		mkdir -p block char)
+	cd $(DISTDIR)/arch/i86 && mkdir -p boot drivers kernel lib mm tools
+	cd $(DISTDIR)/arch/i86/drivers && mkdir -p block char
 	cp -pf defconfig Makefile $(DISTDIR)/arch/i86
 	cp -pf boot/*.S boot/*.c $(DISTDIR)/arch/i86/boot
 	cp -pf tools/Makefile tools/*.h $(DISTDIR)/arch/i86/tools
