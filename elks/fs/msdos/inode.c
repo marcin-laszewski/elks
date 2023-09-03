@@ -197,7 +197,7 @@ printk("FAT: me=%x,csz=%d,#f=%d,floc=%d,fsz=%d,rloc=%d,#d=%d,dloc=%d,#s=%ld,ts=%
 	}
 
 	total_displayed = total_sectors >> (BLOCK_SIZE_BITS - SECTOR_BITS_SB(s));
-#if UNUSED
+#if UNUSED      /* calculate free count on mount */
 	long free_displayed = 0;
 	cluster_t cluster;
 	for (cluster = 2; cluster < sb->clusters + 2; cluster++)
@@ -313,7 +313,7 @@ void msdos_read_inode(register struct inode *inode)
 		inode->i_mode = devnods[(int)inode->i_ino - DEVINO_BASE].mode;
 		inode->i_uid  = 0;
 		inode->i_size = 0;
-		inode->i_mtime= CURRENT_TIME;
+		inode->i_mtime= current_time();
 		inode->i_gid  = 0;
 		inode->i_nlink= 1;
 		inode->i_rdev = devnods[(int)inode->i_ino - DEVINO_BASE].rdev;

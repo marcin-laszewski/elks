@@ -20,8 +20,8 @@
 /*
  *	System variable setups
  */
-#define ENV		1		/* allow environ variables as bootopts*/
-#define DEBUG		0		/* display parsing at boot*/
+#define ENV             1       /* allow environ variables as bootopts*/
+#define DEBUG           0       /* display parsing at boot*/
 
 #define MAX_INIT_ARGS	8
 #define MAX_INIT_ENVS	8
@@ -33,7 +33,7 @@ int root_mountflags = 0;
 #endif
 struct netif_parms netif_parms[MAX_ETHS] = {
     /* NOTE:  The order must match the defines in netstat.h:
-     * ETH_NE2K, ETH_WD, ETH_EL3	*/
+     * ETH_NE2K, ETH_WD, ETH_EL3    */
     { NE2K_IRQ, NE2K_PORT, 0, NE2K_FLAGS },
     { WD_IRQ, WD_PORT, WD_RAM, WD_FLAGS },
     { EL3_IRQ, EL3_PORT, 0, EL3_FLAGS },
@@ -134,7 +134,7 @@ void INITPROC kernel_init(void)
 
     inode_init();
     if (buffer_init())	/* also enables xms and unreal mode if configured and possible*/
-	panic("No buf mem");
+        panic("No buf mem");
 
     device_init();
 
@@ -213,12 +213,12 @@ static void init_task(void)
 
     /* Don't open /dev/console for /bin/init, 0-2 closed immediately and fragments heap*/
     //if (strcmp(init_command, bininit) != 0) {
-	/* Set stdin/stdout/stderr to /dev/console if not running /bin/init*/
-	num = sys_open(s="/dev/console", O_RDWR, 0);
-	if (num < 0)
-	    printk("Unable to open %s (error %d)\n", s, num);
-	sys_dup(num);		/* open stdout*/
-	sys_dup(num);		/* open stderr*/
+        /* Set stdin/stdout/stderr to /dev/console if not running /bin/init*/
+        num = sys_open(s="/dev/console", O_RDWR, 0);
+        if (num < 0)
+            printk("Unable to open %s (error %d)\n", s, num);
+        sys_dup(num);		/* open stdout*/
+        sys_dup(num);		/* open stderr*/
     //}
 
 #ifdef CONFIG_BOOTOPTS
@@ -354,12 +354,10 @@ static void parse_umb(char *line)
 		if((p = strchr(p+1, ':'))) {
 			len = (segext_t)simple_strtol(p+1, 16);
 			end = base + len;
-#if DEBUG
-			printk("umb segment from %x to %x\n", base, end);
-#endif
+			debug("umb segment from %x to %x\n", base, end);
 			seg_add(base, end);
 		}
-	}while((p = strchr(p+1, ',')));
+	} while((p = strchr(p+1, ',')));
 }
 
 /*
@@ -384,9 +382,7 @@ static int parse_options(void)
 	if (*(unsigned short *)options != 0x2323 || options[OPTSEGSZ-1])
 		return 0;
 
-#if DEBUG
-	printk("/bootopts: %s", &options[3]);
-#endif
+	debug("/bootopts: %s", &options[3]);
 	next = line;
 	while ((line = next) != NULL && *line) {
 		if ((next = option(line)) != NULL) {
@@ -404,9 +400,7 @@ static int parse_options(void)
 		 */
 		if (!strncmp(line,"root=",5)) {
 			int dev = parse_dev(line+5);
-#if DEBUG
-			printk("root %s=%D\n", line+5, dev);
-#endif
+			debug("root %s=%D\n", line+5, dev);
 			ROOT_DEV = (kdev_t)dev;
 			boot_rootdev = dev;    /* stop translation in device_setup*/
 			continue;
@@ -423,9 +417,7 @@ static int parse_options(void)
 			}
 
 
-#if DEBUG
-			printk("console %s=%D\n", line+8, dev);
-#endif
+			debug("console %s=%D\n", line+8, dev);
 			boot_console = dev;
 			continue;
 		}

@@ -227,7 +227,7 @@ static unsigned short map_izone(register struct inode *inode, block_t block, int
 
     if (create && !(*i_zone)) {
 	if ((*i_zone = minix_new_block(inode->i_sb))) {
-	    inode->i_ctime = CURRENT_TIME;
+	    inode->i_ctime = current_time();
 	    inode->i_dirt = 1;
 	}
     }
@@ -260,11 +260,7 @@ unsigned short _minix_bmap(register struct inode *inode, block_t block, int crea
 {
     int i;
 
-#if 0
-/* I do not understand what this bit means, it cannot be this big,
- * it is a short. If this was a long it would make sense. We need to
- * check for overruns in the block num elsewhere.. FIXME
- */
+#if UNUSED  /* block always less than 65536 */
     if (block > (7 + 512 + 512 * 512))
 	panic("_minix_bmap: block (%d) >big", block);
 #endif
