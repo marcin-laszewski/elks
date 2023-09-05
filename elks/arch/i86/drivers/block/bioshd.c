@@ -412,10 +412,17 @@ static unsigned short int INITPROC bioshd_getfdinfo(void)
     BD_AX = BIOSHD_DRIVE_PARMS;
     BD_DX = 0;                  /* query floppies only*/
     BD_ES = BD_DI = BD_SI = 0;  /* guard against BIOS bugs*/
-    if (!call_bios(&bdt))
-        ndrives = BD_DX & 0xff; /* floppy drive count*/
-    else
-        printk("fd: no bios get drives, ndrives %d\n", ndrives);
+    if (!call_bios(&bdt)) {
+        int drives = BD_DX & 0xff;      /* floppy drive count */
+        if (!drives && ndrives) {       /* handle Toshiba T1100 BIOS returning 0 drives */
+            for (drive = 0; drive < ndrives; drive++) {
+                printk("fd%d: default 720k\n", drive);
+                *drivep++ = fd_types[2];
+            }
+            return ndrives;
+        } else ndrives = drives;
+    } else
+        printk("fd: no get drive fn, ndrives %d\n", ndrives);
 
     /* set drive type for floppies*/
     for (drive = 0; drive < ndrives; drive++) {
@@ -428,8 +435,11 @@ static unsigned short int INITPROC bioshd_getfdinfo(void)
         BD_ES = BD_DI = BD_SI = 0;      /* guard against BIOS bugs*/
         if (!call_bios(&bdt))           /* returns drive type in BL*/
             *drivep = fd_types[(BD_BX & 0xFF) - 1];
-        else
-            *drivep = fd_types[(sys_caps & CAP_PC_AT) ? 3 : 0];
+        else {
+            int type = (sys_caps & CAP_PC_AT) ? 3 : 0;
+            *drivep = fd_types[type];
+            printk("fd%d: default %s\n", drive, type? "1440k": "360k");
+        }
         drivep++;
     }
 #endif
@@ -707,7 +717,7 @@ static void probe_floppy(int target, struct hd_struct *hdp)
 #endif
 
 got_geom:
-        printk("fd: /dev/fd%d %s has %d cylinders, %d heads, and %d sectors\n", target,
+        printk("fd%d: %s has %d cylinders, %d heads, and %d sectors\n", target,
                    (found_PB == 2)? "DOS format," :
                    (found_PB == 1)? "ELKS bootable,": "probed, probably",
                    drivep->cylinders, drivep->heads, drivep->sectors);
@@ -773,7 +783,7 @@ int INITPROC bioshd_init(void)
 #ifdef PRINT_DRIVE_INFO
     {
         register struct drive_infot *drivep;
-        static char UNITS[4] = "kMGT";
+        static char UNITS[4] = "KMGT";
 
         drivep = drive_info;
         for (count = 0; count < PRINT_DRIVE_INFO; count++, drivep++) {
@@ -792,10 +802,10 @@ int INITPROC bioshd_init(void)
                     unit++;
                 }
                 debug("DBG: Size = %lu (%X/%X)\n",size,*unit,unit[1]);
-                printk("/dev/%cd%c: %u cylinders, %d heads, %d sectors = %lu.%u %cb\n",
+                printk("%cd%c: %4lu%c CHS %3u,%2d,%d\n",
                     (count < 4 ? 'h' : 'f'), (count & 3) + (count < 4 ? 'a' : '0'),
-                    drivep->cylinders, drivep->heads, drivep->sectors,
-                    (size/10), (int) (size%10), *unit);
+                    (size/10), *unit,
+                    drivep->cylinders, drivep->heads, drivep->sectors);
             }
         }
     }

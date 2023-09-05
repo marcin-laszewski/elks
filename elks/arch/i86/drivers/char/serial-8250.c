@@ -317,7 +317,7 @@ static void rs_release(struct tty *tty)
 {
     register struct serial_info *port = &ports[tty->minor - RS_MINOR_OFFSET];
 
-    debug_tty("SERIAL close %d\n", current->pid);
+    debug_tty("SERIAL close %P\n");
     if (--tty->usecount == 0) {
         OUTB(0, port->io + UART_IER);   /* Disable all interrupts */
         free_irq(port->irq);
@@ -330,7 +330,7 @@ static int rs_open(struct tty *tty)
     register struct serial_info *port = &ports[tty->minor - RS_MINOR_OFFSET];
     int err;
 
-    debug_tty("SERIAL open %d\n", current->pid);
+    debug_tty("SERIAL open %P\n");
 
     if (!(port->flags & SERF_EXIST))
         return -ENXIO;
@@ -523,7 +523,7 @@ void INITPROC serial_init(void)
 
     do {
         if (sp->tty != NULL) {
-            printk("ttyS%d at 0x%x, irq %d is a%s\n", ttyno,
+            printk("ttyS%d at %x, irq %d is a%s\n", ttyno,
                        sp->io, sp->irq, serial_type[sp->flags & SERF_TYPE]);
         }
         sp++;
