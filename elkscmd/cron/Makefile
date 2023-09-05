@@ -25,14 +25,16 @@ all: $(progs)
 install: $(progs)
 
 cron: cron.o runjob.o $(common)
-	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ cron.o runjob.o $(common)
+	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
 
 crontab: crontab.o $(common)
-	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ crontab.o $(common)
+	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
 
+.PHONY: clean
 clean:
 	$(RM) $(progs) *.o
-	
+
+.PHONY: install
 install: cron
 	$(INSTALL) cron $(DESTDIR)/bin/cron
 	$(INSTALL) crontab $(DESTDIR)/bin/crontab
