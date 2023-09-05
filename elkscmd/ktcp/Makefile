@@ -31,7 +31,7 @@ install: ktcp
 
 .PHONY: clean
 clean: 
-	$(RM) *~ *.o ktcp core 
+	$(RM) *~ *.o ktcp core $(LFILES)
 
 .PHONY: dep
 dep:
