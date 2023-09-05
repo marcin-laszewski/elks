@@ -26,8 +26,10 @@ lint: $(LFILES)
 	splint -weak -D__KERNEL__ $(LOCALFLAGS) $< 2>&1 > $@ || ( $(RM) $@ && false )
 
 .PHONY: install
-install: ktcp
-	$(INSTALL) ktcp $(DESTDIR)/bin
+install: $(DESTDIR)/bin/ktcp
+
+$(DESTDIR)/bin/ktcp: ktcp
+	$(INSTALL) $< $@
 
 .PHONY: clean
 clean: 
