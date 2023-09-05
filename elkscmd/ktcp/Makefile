@@ -1,4 +1,3 @@
-# Makefile for ktcp
 BASEDIR=..
 include $(BASEDIR)/Make.defs
 
@@ -11,13 +10,11 @@ LFILES		= $(addsuffix .lint,$(CFILES))
 
 OBJS		= $(CFILES:.c=.o)
 
-##############################################################################
-
 .PHONY: all
 all:	ktcp
 
 ktcp:	$(OBJS)
-	$(LD) $(LDFLAGS) -maout-heap=32768 -maout-stack=3072  -o ktcp $(OBJS) $(LDLIBS)
+	$(LD) $(LDFLAGS) -maout-heap=32768 -maout-stack=3072 -o $@ $^ $(LDLIBS)
 
 .PHONY: lint
 lint: $(LFILES)
@@ -28,17 +25,13 @@ lint: $(LFILES)
 .PHONY: install
 install: $(DESTDIR)/bin/ktcp
 
-$(DESTDIR)/bin/ktcp: ktcp
+$(DESTDIR)/bin/%: %
 	$(INSTALL) $< $@
 
 .PHONY: clean
 clean: 
-	$(RM) *~ *.o ktcp core $(LFILES)
+	$(RM) *~ $(OBJS) ktcp core $(LFILES)
 
 .PHONY: dep
 dep:
 	makedepend $(CFILES)
-
-#######
-# EOF #
-#######
