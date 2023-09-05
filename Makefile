@@ -7,14 +7,17 @@ include $(TOPDIR)/Make.defs
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: .config include/autoconf.h libc-install
-	$(MAKE) -C elks all
+all: .config include/autoconf.h libc-install kernel
 	$(MAKE) -C bootblocks all
 	$(MAKE) -C elkscmd all
 	$(MAKE) -C image all
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
+
+.PHONY: kernel
+kernel:
+	$(MAKE) -C elks all
 
 kclean:
 	$(MAKE) -C elks kclean
