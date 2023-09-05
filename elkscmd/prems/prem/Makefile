@@ -93,12 +93,12 @@ b_prem.o:       b_prem.c $(ELHDRS)
 
 b_malpre.o:     b_malpre.c $(ENHDRS)
 
-clean:;         @rm -f $(OBJS) $(LIBRARY)
+clean:;         @$(RM) $(OBJS) $(LIBRARY)
 
 depend:;        @mkmf -f $(MAKEFILE) LIBRARY=$(LIBRARY) DEST=$(DEST)
 
 extract:;       @$(AR) xo $(DEST)/$(LIBRARY)
-		@rm -f __.SYMDEF
+		@$(RM) __.SYMDEF
 
 index:;         @ctags -wx $(HDRS) $(SRCS)
 

@@ -30,4 +30,4 @@ arp: arp.o $(TINYPRINTF)
 	$(LD) $(LDFLAGS) arp.o $(TINYPRINTF) -o arp $(LDLIBS)
 
 clean:
-	rm -f core *.o $(PRGS)
+	$(RM) core *.o $(PRGS)

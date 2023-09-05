@@ -73,13 +73,13 @@ endif
 	m4 -DSRCDIR=. libelf_msize.m4 > libelf_msize.c; \
 	for src in *.c; \
 		do $(CC) $(CFLAGS) -c -I. -I../common "$$src"; done; \
-	rm -f libelf.a; \
+	$(RM) libelf.a; \
 	$(AR) $(ARFLAGS) libelf.a *.o
 
 doclean: elftoolchain-doclean
 
 elftoolchain-doclean:
-	rm -rf $(ELFTOOLCHAIN)
+	$(RM) -r $(ELFTOOLCHAIN)
 
 #########################################################################
 ### Dependencies:

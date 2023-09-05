@@ -231,4 +231,4 @@ endif
 
 clean:
 	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
-	rm -rf build-ml *.o libc.a
+	$(RM) -r build-ml *.o libc.a

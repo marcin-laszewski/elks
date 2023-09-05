@@ -57,7 +57,7 @@ fd360-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd360-minix
-	rm Config
+	$(RM) Config
 
 fd720-minix:
 	echo CONFIG_APPS_720K=y		> Config
@@ -67,7 +67,7 @@ fd720-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd720-minix
-	rm Config
+	$(RM) Config
 
 fd1200-minix:
 	echo CONFIG_APPS_1200K=y	> Config
@@ -77,7 +77,7 @@ fd1200-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1200-minix
-	rm Config
+	$(RM) Config
 
 fd1440-minix:
 	echo CONFIG_APPS_1440K=y	> Config
@@ -87,7 +87,7 @@ fd1440-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1440-minix
-	rm Config
+	$(RM) Config
 
 fd2880-minix:
 	echo CONFIG_APPS_2880K=y	> Config
@@ -97,7 +97,7 @@ fd2880-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd2880-minix
-	rm Config
+	$(RM) Config
 
 hd32-minix:
 	echo CONFIG_APPS_2880K=y	> Config
@@ -111,7 +111,7 @@ hd32-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-minix
-	rm Config
+	$(RM) Config
 
 hd64-minix:
 	echo CONFIG_APPS_2880K=y	> Config
@@ -125,7 +125,7 @@ hd64-minix:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd64-minix
-	rm Config
+	$(RM) Config
 
 fd360-fat:
 	echo CONFIG_APPS_360K=y		> Config
@@ -135,7 +135,7 @@ fd360-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd360-fat
-	rm Config
+	$(RM) Config
 
 fd720-fat:
 	echo CONFIG_APPS_720K=y		> Config
@@ -145,7 +145,7 @@ fd720-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd720-fat
-	rm Config
+	$(RM) Config
 
 fd1200-fat:
 	echo CONFIG_APPS_1200K=y	> Config
@@ -155,7 +155,7 @@ fd1200-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1200-fat
-	rm Config
+	$(RM) Config
 
 fd1440-fat:
 	echo CONFIG_APPS_1440K=y	> Config
@@ -165,7 +165,7 @@ fd1440-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1440-fat
-	rm Config
+	$(RM) Config
 
 # FAT16 image
 fd2880-fat:
@@ -176,7 +176,7 @@ fd2880-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd2880-fat
-	rm Config
+	$(RM) Config
 
 # FAT32 image
 hd32-fat:
@@ -191,7 +191,7 @@ hd32-fat:
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-fat
-	rm Config
+	$(RM) Config
 
 # MBR images
 hd32mbr-minix:
@@ -205,5 +205,5 @@ hd32mbr-fat:
 # Clean target
 
 clean:
-	-rm -rf $(DESTDIR)
-	-rm -f *.img *.bin
+	-$(RM) -r $(DESTDIR)
+	-$(RM) *.img *.bin

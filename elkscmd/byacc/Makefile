@@ -63,7 +63,7 @@ install: $(PROGRAM)
 	$(INSTALL) $(PROGRAM) $(DESTDIR)/bin
 
 clean:
-	rm -f $(OBJS) $(PROGRAM) core
+	$(RM) $(OBJS) $(PROGRAM) core
 
 #depend:;	@mkmf -f $(MAKEFILE) PROGRAM=$(PROGRAM) DEST=$(DEST)
 #

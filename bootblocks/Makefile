@@ -35,12 +35,12 @@ boot_sect.o: boot_sect.S $(TOPDIR)/include/autoconf.h
 	$(CC) $(INCLUDES) -E -o boot_sect.tmp boot_sect.S
 	$(CC) $(INCLUDES) -E -UBOOT_FAT -o boot_sect.tmp boot_sect.S
 	$(AS) $(ASFLAGS) -o boot_sect.o boot_sect.tmp
-	rm -f boot_sect.tmp
+	$(RM) boot_sect.tmp
 
 boot_probe.o: boot_probe.S $(TOPDIR)/include/autoconf.h
 	$(CC) $(INCLUDES) -E -o boot_probe.tmp boot_probe.S
 	$(AS) $(ASFLAGS) -oboot_probe.o boot_probe.tmp
-	rm -f boot_probe.tmp
+	$(RM) boot_probe.tmp
 
 boot_minix.o: boot_minix.c $(TOPDIR)/include/autoconf.h
 
@@ -52,15 +52,15 @@ mbr.bin: mbr.S
 	$(AS) $(ASFLAGS) -o mbr.o mbr.tmp
 	$(LD) $(LDFLAGS) -M -o mbr.bin mbr.o > mbr.map
 	xxd -i mbr.bin > mbr_autogen.c
-	rm -f mbr.tmp
+	$(RM) mbr.tmp
 
 boot_sect_fat.o: boot_sect.S boot_sect_fat.h $(TOPDIR)/include/autoconf.h
 	$(CC) $(INCLUDES) -E -DBOOT_FAT -o boot_sect_fat.tmp boot_sect.S
 	$(AS) $(ASFLAGS) -o boot_sect_fat.o boot_sect_fat.tmp
-	rm -f boot_sect_fat.tmp
+	$(RM) boot_sect_fat.tmp
 
 clean:
-	rm -f *.o *.bin *.map mbr_autogen.c
+	$(RM) *.o *.bin *.map mbr_autogen.c
 
 # Boot blocks are not part of the target filesystem
 # but embedded in the target disk image

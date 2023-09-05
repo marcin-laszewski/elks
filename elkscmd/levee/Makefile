@@ -27,7 +27,7 @@ install: lev
 	$(INSTALL) lev $(DESTDIR)/bin/vi
 
 clean:
-	rm -f *.o lev
+	$(RM) *.o lev
 
 # Dependencies
 

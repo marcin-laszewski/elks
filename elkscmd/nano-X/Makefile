@@ -135,9 +135,9 @@ install: $(NANOXDEMOS)
 	$(INSTALL) demos/nxworld.map $(DESTDIR)/lib/nxworld.map
 
 clean:
-	rm -f *.o *.a nano-X core
-	rm -f drivers/*.o
-	rm -f bin/*
-	rm -f nanox/*.o
-	rm -f engine/*.o
-	rm -f demos/*.o
+	$(RM) *.o *.a nano-X core
+	$(RM) drivers/*.o
+	$(RM) bin/*
+	$(RM) nanox/*.o
+	$(RM) engine/*.o
+	$(RM) demos/*.o

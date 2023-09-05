@@ -87,7 +87,7 @@ toolkit:
 $(BASEDIR)/include/arch/asm-offsets.h: kernel/asm-offsets.c asm-offsets.awk
 	$(CC) $(CFLAGS) -S -o asm-offsets.s kernel/asm-offsets.c
 	awk -f asm-offsets.awk asm-offsets.s > $(BASEDIR)/include/arch/asm-offsets.h
-	rm asm-offsets.s
+	$(RM) asm-offsets.s
 
 #########################################################################
 # Image selection.

@@ -26,4 +26,4 @@ install: $(PRG)
 	$(INSTALL) sample_index.html $(DESTDIR)/var/www/index.html
 
 clean:
-	rm -f *.o $(PRG)
+	$(RM) *.o $(PRG)

@@ -124,8 +124,8 @@ net/net.a:
 
 tools:
 	${MAKE} -C tools all
-	-rm -f include/linuxmt/compiler-generated.h
-	-rm -f kernel/version.o
+	-$(RM) include/linuxmt/compiler-generated.h
+	-$(RM) kernel/version.o
 
 #########################################################################
 # Compiler-generated definitions not given as command arguments.
@@ -158,7 +158,7 @@ elks.spec: Makefile
 dist:
 	@${MAKE} -C . nodep clean distclean
 	@echo
-	-rm -rf $(DISTDIR)
+	-$(RM) -r $(DISTDIR)
 	@${MAKE} mkdist
 
 dist.old:
@@ -187,7 +187,7 @@ dist.old:
 	@printf '\n  %076u\n\n' 0 | tr 0 =
 
 distclean: clean nodep
-	rm -f arch/i86/Image
+	$(RM) arch/i86/Image
 
 #########################################################################
 # Create distribution archives.
@@ -207,7 +207,7 @@ rpm:	tar rpm.spec
 tar:	dist
 	-chmod -R a+r $(DISTDIR)
 	tar chozf $(DISTDIR).tar.gz $(DISTDIR)
-	-rm -rf $(DISTDIR)
+	-$(RM) -r $(DISTDIR)
 
 #########################################################################
 # Configuration stuff
@@ -230,7 +230,7 @@ dep:	$(TOPDIR)/include/autoconf.h
 	@echo
 
 dup:
-	rm -fr ../elks-test
+	$(RM) -r ../elks-test
 	mkdir ../elks-test
 	tar c * | ( cd ../elks-test ; tar xv )
 	@echo

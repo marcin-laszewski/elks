@@ -38,4 +38,4 @@ install: $(PRGS)
 	$(INSTALL) $(PRGS) $(DESTDIR)/bin
 
 clean:
-	rm -f $(PRGS) $(PRGS_HOST) *~ *.o
+	$(RM) $(PRGS) $(PRGS_HOST) *~ *.o

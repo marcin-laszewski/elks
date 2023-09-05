@@ -44,4 +44,4 @@ ramdisk: ramdisk.o
 	$(LD) $(LDFLAGS) -o ramdisk ramdisk.o $(LDLIBS)
 
 clean:
-	rm -f *.o $(FORMATMOD) core $(PRGS)
+	$(RM) *.o $(FORMATMOD) core $(PRGS)

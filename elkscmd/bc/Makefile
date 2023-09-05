@@ -52,7 +52,7 @@ math.h: libmath.b
 	$(MAKE) -$(MAKEFLAGS) fbc
 	elksemu ./fbc -c libmath.b </dev/null >math.h
 	./fix_math.h
-	rm -f ./fbc
+	$(RM) ./fbc
 
 fbc: $(OFILES) bc.o
 	echo \"\" > math.h
@@ -64,7 +64,7 @@ install: bc fbc
 #	$(INSTALL) fbc $(DESTDIR)/bin
 
 clean:
-	rm -f *.o *.bak core math.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
+	$(RM) *.o *.bak core math.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
 
 scan.c: scan.l
 	$(LEX) scan.l

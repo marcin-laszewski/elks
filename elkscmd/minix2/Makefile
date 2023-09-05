@@ -47,4 +47,4 @@ install: $(PRGS)
 	$(INSTALL) $(PRGS) $(DESTDIR)/bin
 
 clean:
-	rm -f core *.o $(PRGS)
+	$(RM) core *.o $(PRGS)

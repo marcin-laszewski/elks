@@ -17,4 +17,4 @@ OBJS = \
 all: $(OBJS)
 
 clean:
-	rm -f *.o
+	$(RM) *.o

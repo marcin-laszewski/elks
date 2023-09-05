@@ -28,5 +28,5 @@ install: ftpd ftp
 	$(INSTALL) $(BINS)  $(DESTDIR)/bin
 
 clean:
-	rm -f $(BINS) $(OBJS)
+	$(RM) $(BINS) $(OBJS)
 

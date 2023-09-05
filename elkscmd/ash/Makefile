@@ -55,7 +55,7 @@ install: ash
 	$(INSTALL) ash $(DESTDIR)/bin/sh
 
 clean:
-	rm -f core ash $(CLEANFILES)
+	$(RM) core ash $(CLEANFILES)
 
 parser.o: token.def
 

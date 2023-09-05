@@ -27,7 +27,7 @@ install: ktcp
 	$(INSTALL) ktcp $(DESTDIR)/bin
 
 clean: 
-	rm -f *~ *.o ktcp core 
+	$(RM) *~ *.o ktcp core 
 
 dep:
 	makedepend $(CFILES)
