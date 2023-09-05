@@ -33,9 +33,12 @@ clean:
 	$(RM) $(progs) *.o
 
 .PHONY: install
-install: $(progs)
-	$(INSTALL) cron $(DESTDIR)/bin/cron
-	$(INSTALL) crontab $(DESTDIR)/bin/crontab
+install: \
+ $(DESTDIR)/bin/cron \
+ $(DESTDIR)/bin/crontab \
+
+$(DESTDIR)/bin/%: %
+	$(INSTALL) $< $@
 
 cron.o: cron.c cron.h config.h
 crontab.o: crontab.c cron.h config.h
