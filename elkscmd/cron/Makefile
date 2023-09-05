@@ -22,8 +22,6 @@ common=readcrontab.o lib.o
 
 all: $(progs)
 
-install: $(progs)
-
 cron: cron.o runjob.o $(common)
 	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
 
@@ -35,7 +33,7 @@ clean:
 	$(RM) $(progs) *.o
 
 .PHONY: install
-install: cron
+install: $(progs)
 	$(INSTALL) cron $(DESTDIR)/bin/cron
 	$(INSTALL) crontab $(DESTDIR)/bin/crontab
 
