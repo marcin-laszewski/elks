@@ -68,14 +68,8 @@ builtins.c builtins.h: shell.h builtins.table
 init.o: mkinit $(SRCS)
 	./mkinit '$(CC) -c $(CFLAGS) init.c' $(SRCS)
 
-mkinit: mkinit.c
-	gcc -O2 -o $@ $^
-
 nodes.c nodes.h: mknodes nodetypes nodes.c.pat
 	./mknodes nodetypes nodes.c.pat
-
-mknodes: mknodes.c
-	gcc -O2 -o $@ $^
 
 #signames.c signames.h: mksignames
 #	./$<
@@ -86,8 +80,8 @@ mknodes: mknodes.c
 syntax.c syntax.h: mksyntax
 	./$<
 
-mksyntax: mksyntax.c parser.h
-	gcc -O2 -o $@ $<
+%: %.c
+	gcc -O2 -o $@ $^
 
 bltin/operators.c bltin/operators.h: bltin/mkexpr bltin/binary_op bltin/unary_op
 	cd $(dir $@) && sh $(notdir $<)
