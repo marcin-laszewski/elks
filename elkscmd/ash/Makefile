@@ -23,11 +23,8 @@ SRCS=	builtins.c cd.c dirent.c error.c eval.c exec.c expand.c input.c \
 	options.c parser.c redir.c show.c signames.c syntax.c trap.c \
 	output.c var.c linenoise_elks.c autocomplete.c
 
-OBJS=	builtins.o cd.o dirent.o error.o eval.o exec.o expand.o input.o \
-	jobs.o mail.o main.o memalloc.o miscbltin.o mystring.o nodes.o \
-	options.o parser.o redir.o show.o signames.o syntax.o trap.o \
-	output.o var.o init.o \
-	linenoise_elks.o autocomplete.o
+OBJS = $(addsuffix .o,$(basename $(SRCS)))
+OBJS += init.o
 
 # builtins must be manually added
 OBJS += bltin/echo.o
@@ -46,63 +43,66 @@ CLEANFILES= $(OBJS) \
 	nodes.c nodes.h syntax.c syntax.h token.def \
 	bltin/operators.h bltin/operators.c
 
+.PHONY: all
 all:	ash
 
 ash: $(OBJS)
-	$(LD) $(LDFLAGS) -o ash $(OBJS) $(LDLIBS)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
+.PHONY: install
 install: ash
-	$(INSTALL) ash $(DESTDIR)/bin/sh
+	$(INSTALL) $^ $(DESTDIR)/bin/sh
 
+.PHONY: clean
 clean:
 	$(RM) core ash $(CLEANFILES)
 
 parser.o: token.def
 
 token.def: mktokens
-	sh mktokens
+	sh $<
 
-builtins.c builtins.h: builtins.table shell.h
-	sh mkbuiltins shell.h builtins.table
+builtins.c builtins.h: shell.h builtins.table
+	sh mkbuiltins $^
 
 init.o: mkinit $(SRCS)
 	./mkinit '$(CC) -c $(CFLAGS) init.c' $(SRCS)
 
 mkinit: mkinit.c
-	gcc -O2 mkinit.c -o $@
+	gcc -O2 -o $@ $^
 
 nodes.c nodes.h: mknodes nodetypes nodes.c.pat
 	./mknodes nodetypes nodes.c.pat
 
 mknodes: mknodes.c
-	gcc -O2 mknodes.c -o $@
+	gcc -O2 -o $@ $^
 
 #signames.c signames.h: mksignames
-#	./mksignames
+#	./$<
 
 #mksignames: mksignames.c
-#	gcc -O2 mksignames.c -o $@
+#	gcc -O2 -o $@ $^
 
 syntax.c syntax.h: mksyntax
-	./mksyntax
+	./$<
 
 mksyntax: mksyntax.c parser.h
-	gcc -O2 mksyntax.c -o $@
+	gcc -O2 -o $@ $<
 
 bltin/operators.h:	bltin/mkexpr bltin/binary_op bltin/unary_op
-	cd bltin && sh mkexpr
+	cd $(dir $@) && sh $(notdir $<)
 
 bltin/echo.o:	bltin/echo.c
-	cd bltin && $(CC) -I.. $(CFLAGS) -c echo.c
+	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
 
 bltin/expr.o:	bltin/expr.c
-	cd bltin && $(CC) -I.. $(CFLAGS) -c expr.c
+	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
 
 bltin/operators.o:	bltin/operators.c
-	cd bltin && $(CC) -I.. $(CFLAGS) -c operators.c
+	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
 
 bltin/regexp.o:	bltin/regexp.c
-	cd bltin && $(CC) -I.. $(CFLAGS) -c regexp.c
+	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
 
 # Dependencies you say?  This will have to do.
 $(OBJS): error.h eval.h exec.h expand.h init.h input.h \
