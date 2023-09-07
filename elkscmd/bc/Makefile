@@ -48,16 +48,21 @@ bc: $& config.h bc.o $(OFILES) global.o
 sbc: sbc.o $(OFILES) global.o
 	$(LD) -o sbc $(LDFLAGS) $^ $(LDLIBS)
 
-math.h: libmath.b
-	$(MAKE) -$(MAKEFLAGS) fbc
-	elksemu ./fbc -c libmath.b </dev/null >math.h
-	./fix_math.h
-	$(RM) ./fbc
+#math.h: libmath.b
+#	$(MAKE) -$(MAKEFLAGS) fbc
+#	elksemu ./fbc -c libmath.b </dev/null >math.h
+#	./fix_math.h
+#	$(RM) ./fbc
 
-fbc: $(OFILES) bc.o
-	echo \"\" > math.h
-	$(CC) -c $(CFLAGS) global.c
-	$(LD) -o fbc $(LDFLAGS) $^ global.o $(LDLIBS)
+fbc: $(OFILES) bc.o global.o
+	$(LD) -o fbc $(LDFLAGS) $^ $(LDLIBS)
+
+global.o: global.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+math.h:
+	echo \"\" > $@
+
 
 install: bc fbc
 	$(INSTALL) bc $(DESTDIR)/bin
