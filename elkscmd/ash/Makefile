@@ -24,11 +24,12 @@ SRCS=	builtins.c cd.c dirent.c error.c eval.c exec.c expand.c input.c \
 	output.c var.c linenoise_elks.c autocomplete.c
 
 OBJS = $(addsuffix .o,$(basename $(SRCS)))
+
+# Created by 'mkinit'
 OBJS += init.o
 
 # builtins must be manually added
-OBJS += bltin/echo.o
-OBJS += bltin/expr.o bltin/regexp.o bltin/operators.o
+OBJS += bltin/echo.o bltin/expr.o bltin/regexp.o bltin/operators.o
 
 LDFLAGS += -maout-heap=12288 -maout-stack=2304
 
@@ -37,11 +38,6 @@ LDFLAGS += -maout-heap=12288 -maout-stack=2304
 # editline package by Simmule Turner and Rich Salz.  (The big, bloated
 # and GPL contaminated FSF readline should work too.)
 #
-
-CLEANFILES= $(OBJS) \
-	builtins.c builtins.h init.c mkinit mknodes mksignames mksyntax \
-	nodes.c nodes.h syntax.c syntax.h token.def \
-	bltin/operators.h bltin/operators.c
 
 .PHONY: all
 all:	ash
@@ -55,7 +51,9 @@ install: ash
 
 .PHONY: clean
 clean:
-	$(RM) core ash $(CLEANFILES)
+	$(RM) core ash $(OBJS) builtins.c builtins.h init.c mkinit mknodes \
+		mksignames mksyntax nodes.c nodes.h syntax.c syntax.h \
+		token.def bltin/operators.h bltin/operators.c
 
 parser.o: token.def
 
