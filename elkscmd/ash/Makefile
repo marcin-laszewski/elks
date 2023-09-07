@@ -89,7 +89,7 @@ syntax.c syntax.h: mksyntax
 mksyntax: mksyntax.c parser.h
 	gcc -O2 -o $@ $<
 
-bltin/operators.h:	bltin/mkexpr bltin/binary_op bltin/unary_op
+bltin/operators.c bltin/operators.h: bltin/mkexpr bltin/binary_op bltin/unary_op
 	cd $(dir $@) && sh $(notdir $<)
 
 bltin/%.o:	bltin/%.c
