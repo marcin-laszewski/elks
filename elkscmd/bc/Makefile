@@ -63,10 +63,10 @@ global.o: global.c
 math.h:
 	echo \"\" > $@
 
+install: $(DESTDIR)/bin/bc #$(DESTDIR)/bin/fbc
 
-install: bc fbc
-	$(INSTALL) bc $(DESTDIR)/bin
-#	$(INSTALL) fbc $(DESTDIR)/bin
+$(DESTDIR)/bin/%: %
+	$(INSTALL) $< $@
 
 clean:
 	$(RM) *.o *.bak core math.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
