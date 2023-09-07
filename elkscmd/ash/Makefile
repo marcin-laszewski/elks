@@ -92,16 +92,7 @@ mksyntax: mksyntax.c parser.h
 bltin/operators.h:	bltin/mkexpr bltin/binary_op bltin/unary_op
 	cd $(dir $@) && sh $(notdir $<)
 
-bltin/echo.o:	bltin/echo.c
-	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
-
-bltin/expr.o:	bltin/expr.c
-	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
-
-bltin/operators.o:	bltin/operators.c
-	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
-
-bltin/regexp.o:	bltin/regexp.c
+bltin/%.o:	bltin/%.c
 	cd $(dir $@) && $(CC) -I.. $(CFLAGS) -c $(notdir $<)
 
 # Dependencies you say?  This will have to do.
