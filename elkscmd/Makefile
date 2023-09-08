@@ -43,6 +43,15 @@ SUBDIRS =       \
 	test        \
 	# EOL
 
+PROGS	=
+ifdef CONFIG_APP_CGATEXT
+	PROGS += cgatext
+endif
+ifdef CONFIG_APP_ROMPRG
+	PROGS += romprg
+endif
+
+
 ###############################################################################
 #
 # Compile everything.
@@ -50,13 +59,7 @@ SUBDIRS =       \
 include $(BASEDIR)/Make.rules
 
 .PHONY: all
-all: $(TOPDIR)/include/autoconf.h $(SUBDIRS)
-ifdef CONFIG_APP_CGATEXT
-	$(MAKE) -C cgatext
-endif
-ifdef CONFIG_APP_ROMPRG
-	$(MAKE) -C romprg
-endif
+all: $(SUBDIRS) $(PROGS)
 
 $(TOPDIR)/include/autoconf.h:
 	@if ! test -e $@; \
@@ -68,6 +71,10 @@ $(TOPDIR)/include/autoconf.h:
 .PHONY: $(SUBDIRS)
 $(SUBDIRS): $(TOPDIR)/include/autoconf.h
 	$(MAKE) -C $@ all
+
+.PHONY: $(PROGS)
+$(PROGS): $(TOPDIR)/include/autoconf.h
+	$(MAKE) -C $@
 
 .PHONY: install
 install:
