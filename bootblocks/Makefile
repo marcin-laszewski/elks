@@ -25,22 +25,23 @@ endif
 all: $(TARGETS)
 
 minix.bin: boot_sect.o boot_minix.o
-	$(LD) $(LDFLAGS) -M -o $@ $^ > $(basename $@).map
-	dd if=$@ ibs=1k conv=sync of=$(basename $@).tmp; mv $(basename $@).tmp $@
+	$(LD) $(LDFLAGS) -M -o $(basename $@).tmp $^ > $(basename $@).map
+	dd if=$(basename $@).tmp ibs=1k conv=sync of=$@
+	$(RM) $(basename $@).tmp
 
 probe.bin: boot_sect.o boot_probe.o
 	$(LD) $(LDFLAGS) -M -o $@ $^ > $(basename $@).map
 
 boot_sect.o: boot_sect.S $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
-	$(CC) $(INCLUDES) -E -UBOOT_FAT -o $(basename $@).tmp $<
-	$(AS) $(ASFLAGS) -o $@ $(basename $@).tmp
-	$(RM) $(basename $@).tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).asm $<
+	$(CC) $(INCLUDES) -E -UBOOT_FAT -o $(basename $@).asm $<
+	$(AS) $(ASFLAGS) -o $@ $(basename $@).asm
+	$(RM) $(basename $@).asm
 
 boot_probe.o: boot_probe.S $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
-	$(AS) $(ASFLAGS) -o$@ $(basename $@).tmp
-	$(RM) $(basename $@).tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).asm $<
+	$(AS) $(ASFLAGS) -o $@ $(basename $@).asm
+	$(RM) $(basename $@).asm
 
 boot_minix.o: boot_minix.c $(TOPDIR)/include/autoconf.h
 
@@ -48,16 +49,16 @@ fat.bin: boot_sect_fat.o $(TOPDIR)/include/autoconf.h
 	$(LD) $(LDFLAGS) -M -o $@ $< > $(basename $@).map
 
 mbr.bin: mbr.S
-	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
-	$(AS) $(ASFLAGS) -o $(basename $@).o $(basename $@).tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).asm $<
+	$(AS) $(ASFLAGS) -o $(basename $@).o $(basename $@).asm
 	$(LD) $(LDFLAGS) -M -o $@ $(basename $@).o > $(basename $@).map
 	xxd -i $@ > mbr_autogen.c
-	$(RM) $(basename $@).tmp
+	$(RM) $(basename $@).asm
 
 boot_sect_fat.o: boot_sect.S boot_sect_fat.h $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -DBOOT_FAT -o $(basename $@).tmp $<
-	$(AS) $(ASFLAGS) -o $@ $(basename $@).tmp
-	$(RM) $(basename $@).tmp
+	$(CC) $(INCLUDES) -E -DBOOT_FAT -o $(basename $@).asm $<
+	$(AS) $(ASFLAGS) -o $@ $(basename $@).asm
+	$(RM) $(basename $@).asm
 
 clean:
 	$(RM) *.o *.bin *.map mbr_autogen.c
