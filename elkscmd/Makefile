@@ -51,7 +51,7 @@ include $(BASEDIR)/Make.rules
 
 .PHONY: all
 all: $(TOPDIR)/include/autoconf.h $(SUBDIRS)
-ifdef CONFIG_APP_CGATEXT)
+ifdef CONFIG_APP_CGATEXT
 	$(MAKE) -C cgatext
 endif
 ifdef CONFIG_APP_ROMPRG
