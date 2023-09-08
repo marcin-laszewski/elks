@@ -48,9 +48,9 @@ bc: $& config.h bc.o $(OFILES) global.o
 sbc: sbc.o $(OFILES) global.o
 	$(LD) -o sbc $(LDFLAGS) $^ $(LDLIBS)
 
-#math.h: libmath.b
+#libmath.h: libmath.b
 #	$(MAKE) -$(MAKEFLAGS) fbc
-#	elksemu ./fbc -c libmath.b </dev/null >math.h
+#	elksemu ./fbc -c libmath.b </dev/null > libmath.h
 #	./fix_math.h
 #	$(RM) ./fbc
 
@@ -60,7 +60,7 @@ fbc: $(OFILES) bc.o global.o
 global.o: global.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-math.h:
+libmath.h:
 	echo \"\" > $@
 
 install: $(DESTDIR)/bin/bc #$(DESTDIR)/bin/fbc
@@ -69,7 +69,7 @@ $(DESTDIR)/bin/%: %
 	$(INSTALL) $< $@
 
 clean:
-	$(RM) *.o *.bak core math.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
+	$(RM) *.o *.bak core libmath.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
 
 scan.c: scan.l
 	$(LEX) scan.l
@@ -84,7 +84,7 @@ sbc.c: sbc.y
 	$(YACC) -d sbc.y
 	mv y.tab.c sbc.c
 
-global.o: bcdefs.h global.h math.h
+global.o: bcdefs.h global.h libmath.h
 bc.o:	bcdefs.h global.h 
 execute.o: bcdefs.h global.h
 load.o: bcdefs.h global.h 

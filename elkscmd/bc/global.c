@@ -37,6 +37,6 @@
 
 #ifndef BC_MATH_FILE
 CONST char libmath[] = 
-#include "math.h"
+#include "./libmath.h"
 ;
 #endif 
