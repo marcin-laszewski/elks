@@ -50,9 +50,7 @@ SUBDIRS =       \
 include $(BASEDIR)/Make.rules
 
 .PHONY: all
-all:
-	@if [ ! -e $(TOPDIR)/include/autoconf.h ]; \
-	then echo -e "\n*** ERROR: You must configure ELKS first ***\n" >&2; exit 1; fi
+all: $(TOPDIR)/include/autoconf.h
 	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR all || exit 1; done
 ifdef CONFIG_APP_CGATEXT)
 	$(MAKE) -C cgatext
@@ -60,6 +58,13 @@ endif
 ifdef CONFIG_APP_ROMPRG
 	$(MAKE) -C romprg
 endif
+
+$(TOPDIR)/include/autoconf.h:
+	@if ! test -e $@; \
+	then \
+		echo -e "\n*** ERROR: You must configure ELKS first ***\n" >&2; \
+		false; \
+	fi
 
 .PHONY: install
 install:
