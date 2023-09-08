@@ -66,7 +66,7 @@ $(TOPDIR)/include/autoconf.h:
 	fi
 
 .PHONY: $(SUBDIRS)
-$(SUBDIRS):
+$(SUBDIRS): $(TOPDIR)/include/autoconf.h
 	$(MAKE) -C $@ all
 
 .PHONY: install
