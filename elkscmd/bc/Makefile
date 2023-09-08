@@ -72,8 +72,7 @@ clean:
 	$(RM) *.o *.bak core libmath.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
 
 scan.c: scan.l
-	$(LEX) scan.l
-	mv lex.yy.c scan.c
+	$(LEX) -o $@ $<
 
 y.tab.h bc.c: bc.y
 	@echo "expect 1 shift/reduce conflict"
