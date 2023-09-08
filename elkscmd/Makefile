@@ -49,6 +49,7 @@ SUBDIRS =       \
 
 include $(BASEDIR)/Make.rules
 
+.PHONY: all
 all:
 	@if [ ! -e $(TOPDIR)/include/autoconf.h ]; \
 	then echo -e "\n*** ERROR: You must configure ELKS first ***\n" >&2; exit 1; fi
@@ -60,9 +61,11 @@ ifdef CONFIG_APP_ROMPRG
 	$(MAKE) -C romprg
 endif
 
+.PHONY: install
 install:
 	$(MAKE) -f Make.install "CONFIG=$(TOPDIR)/.config"
 
+.PHONY: clean
 clean:
 	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
 
