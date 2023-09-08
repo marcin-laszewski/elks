@@ -42,7 +42,7 @@ SUBDIRS = Examples Test
 
 all: fbc bc
 
-bc: $& config.h bc.o $(OFILES) global.o
+bc: config.h bc.o $(OFILES) global.o
 	$(LD) -o bc $(LDFLAGS) bc.o $(OFILES) global.o $(LDLIBS)
 
 sbc: sbc.o $(OFILES) global.o
