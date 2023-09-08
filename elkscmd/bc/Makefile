@@ -69,15 +69,14 @@ $(DESTDIR)/bin/%: %
 	$(INSTALL) $< $@
 
 clean:
-	$(RM) *.o *.bak core libmath.h bc fbc sbc bc.c sbc.c scan.c y.tab.h
+	$(RM) *.o *.bak core libmath.h bc fbc sbc bc.c sbc.c scan.c bc.h
 
 scan.c: scan.l
 	$(LEX) -o $@ $<
 
-y.tab.h bc.c: bc.y
+bc.c bc.h: bc.y
 	@echo "expect 1 shift/reduce conflict"
-	$(YACC) -d bc.y
-	mv y.tab.c bc.c
+	$(YACC) -d -o bc.c bc.y
 
 sbc.c: sbc.y
 	$(YACC) -d sbc.y
@@ -90,7 +89,7 @@ load.o: bcdefs.h global.h
 main.o: bcdefs.h global.h version.h
 number.o: bcdefs.h
 sbc.o: bcdefs.h global.h 
-scan.o: y.tab.h bcdefs.h global.h
+scan.o: bc.h bcdefs.h global.h
 storage.o: bcdefs.h global.h
 util.o: bcdefs.h global.h version.h
 
