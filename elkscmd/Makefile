@@ -62,7 +62,7 @@ endif
 $(TOPDIR)/include/autoconf.h:
 	@if ! test -e $@; \
 	then \
-		echo -e "\n*** ERROR: You must configure ELKS first ***\n" >&2; \
+		echo "You must configure ELKS first: $@" >&2; \
 		false; \
 	fi
 
