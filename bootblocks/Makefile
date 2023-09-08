@@ -25,39 +25,39 @@ endif
 all: $(TARGETS)
 
 minix.bin: boot_sect.o boot_minix.o
-	$(LD) $(LDFLAGS) -M -o minix.bin boot_sect.o boot_minix.o > minix.map
-	dd if=minix.bin ibs=1k conv=sync of=minix.tmp; mv minix.tmp minix.bin
+	$(LD) $(LDFLAGS) -M -o $@ $^ > $(basename $@).map
+	dd if=$@ ibs=1k conv=sync of=$(basename $@).tmp; mv $(basename $@).tmp $@
 
 probe.bin: boot_sect.o boot_probe.o
-	$(LD) $(LDFLAGS) -M -o probe.bin boot_sect.o boot_probe.o > probe.map
+	$(LD) $(LDFLAGS) -M -o $@ $^ > $(basename $@).map
 
 boot_sect.o: boot_sect.S $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -o boot_sect.tmp boot_sect.S
-	$(CC) $(INCLUDES) -E -UBOOT_FAT -o boot_sect.tmp boot_sect.S
-	$(AS) $(ASFLAGS) -o boot_sect.o boot_sect.tmp
-	$(RM) boot_sect.tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
+	$(CC) $(INCLUDES) -E -UBOOT_FAT -o $(basename $@).tmp $<
+	$(AS) $(ASFLAGS) -o $@ $(basename $@).tmp
+	$(RM) $(basename $@).tmp
 
 boot_probe.o: boot_probe.S $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -o boot_probe.tmp boot_probe.S
-	$(AS) $(ASFLAGS) -oboot_probe.o boot_probe.tmp
-	$(RM) boot_probe.tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
+	$(AS) $(ASFLAGS) -o$@ $(basename $@).tmp
+	$(RM) $(basename $@).tmp
 
 boot_minix.o: boot_minix.c $(TOPDIR)/include/autoconf.h
 
 fat.bin: boot_sect_fat.o $(TOPDIR)/include/autoconf.h
-	$(LD) $(LDFLAGS) -M -o fat.bin boot_sect_fat.o > fat.map
+	$(LD) $(LDFLAGS) -M -o $@ $< > $(basename $@).map
 
 mbr.bin: mbr.S
-	$(CC) $(INCLUDES) -E -o mbr.tmp mbr.S
-	$(AS) $(ASFLAGS) -o mbr.o mbr.tmp
-	$(LD) $(LDFLAGS) -M -o mbr.bin mbr.o > mbr.map
-	xxd -i mbr.bin > mbr_autogen.c
-	$(RM) mbr.tmp
+	$(CC) $(INCLUDES) -E -o $(basename $@).tmp $<
+	$(AS) $(ASFLAGS) -o $(basename $@).o $(basename $@).tmp
+	$(LD) $(LDFLAGS) -M -o $@ $(basename $@).o > $(basename $@).map
+	xxd -i $@ > mbr_autogen.c
+	$(RM) $(basename $@).tmp
 
 boot_sect_fat.o: boot_sect.S boot_sect_fat.h $(TOPDIR)/include/autoconf.h
-	$(CC) $(INCLUDES) -E -DBOOT_FAT -o boot_sect_fat.tmp boot_sect.S
-	$(AS) $(ASFLAGS) -o boot_sect_fat.o boot_sect_fat.tmp
-	$(RM) boot_sect_fat.tmp
+	$(CC) $(INCLUDES) -E -DBOOT_FAT -o $(basename $@).tmp $<
+	$(AS) $(ASFLAGS) -o $@ $(basename $@).tmp
+	$(RM) $(basename $@).tmp
 
 clean:
 	$(RM) *.o *.bin *.map mbr_autogen.c
