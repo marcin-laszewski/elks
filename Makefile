@@ -7,8 +7,7 @@ include $(TOPDIR)/Make.defs
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: .config include/autoconf.h libc-install kernel
-	$(MAKE) -C bootblocks all
+all: .config include/autoconf.h libc-install kernel boot
 	$(MAKE) -C elkscmd all
 	$(MAKE) -C image all
 ifneq ($(shell uname), Darwin)
@@ -21,6 +20,10 @@ kernel:
 
 kclean:
 	$(MAKE) -C elks kclean
+
+.PHONY: boot
+boot:
+	$(MAKE) -C bootblocks all
 
 clean: libc-clean libc-uninstall
 	$(MAKE) -C elks clean
