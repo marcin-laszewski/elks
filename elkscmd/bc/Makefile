@@ -43,7 +43,7 @@ SUBDIRS = Examples Test
 all: fbc bc
 
 bc: bc.o $(OFILES) global.o
-	$(LD) -o bc $(LDFLAGS) bc.o $(OFILES) global.o $(LDLIBS)
+	$(LD) -o bc $(LDFLAGS) $^ $(LDLIBS)
 
 sbc: sbc.o $(OFILES) global.o
 	$(LD) -o sbc $(LDFLAGS) $^ $(LDLIBS)
