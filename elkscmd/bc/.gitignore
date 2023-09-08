@@ -1,6 +1,6 @@
 bc
 bc.c
+bc.h
 fbc
-math.h
+libmath.h
 scan.c
-y.tab.h
