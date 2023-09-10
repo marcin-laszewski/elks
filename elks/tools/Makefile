@@ -36,6 +36,9 @@ all:
 	$(MAKE) -C elks-compress all
 	$(MAKE) -C eman all
 
+.PHONY: elf2elks
+elf2elks:
+	$(MAKE) -C elf2elks all
 
 #########################################################################
 ### Dependencies:

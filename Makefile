@@ -5,9 +5,11 @@ endif
 
 include $(TOPDIR)/Make.defs
 
+LIB86	= elks/arch/i86/lib/lib86.a
+
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: libc-install kernel boot elkscmd image
+all:  kernel boot elkscmd image
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
@@ -28,8 +30,22 @@ boot: .config include/autoconf.h
 	$(MAKE) -C bootblocks all
 
 .PHONY: elkscmd
-elkscmd: .config include/autoconf.h libc
+elkscmd: .config include/autoconf.h libc-install tools-elf2elks \
+ $(LIB86) \
+ bootblocks/mbr_autogen.c
 	$(MAKE) -C elkscmd all
+
+.PHONY: bootblocks/mbr_autogen.c
+bootblocks/mbr_autogen.c:
+	$(MAKE) -C $(dir $@) $(notdir $@)
+
+.PHONY: tools-elf2elks
+tools-elf2elks:
+	$(MAKE) -C elks tools-elf2elks
+
+.PHONY: $(LIB86)
+$(LIB86):
+	$(MAKE) -C $(dir $@) $(notdir $@)
 
 clean: libc-clean libc-uninstall
 	$(MAKE) -C elks clean

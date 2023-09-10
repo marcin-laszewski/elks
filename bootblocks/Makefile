@@ -48,11 +48,13 @@ boot_minix.o: boot_minix.c $(TOPDIR)/include/autoconf.h
 fat.bin: boot_sect_fat.o $(TOPDIR)/include/autoconf.h
 	$(LD) $(LDFLAGS) -M -o $@ $< > $(basename $@).map
 
+mbr_autogen.c: mbr.bin
+	xxd -i $< > $@
+
 mbr.bin: mbr.S
 	$(CC) $(INCLUDES) -E -o $(basename $@).asm $<
 	$(AS) $(ASFLAGS) -o $(basename $@).o $(basename $@).asm
 	$(LD) $(LDFLAGS) -M -o $@ $(basename $@).o > $(basename $@).map
-	xxd -i $@ > mbr_autogen.c
 	$(RM) $(basename $@).asm
 
 boot_sect_fat.o: boot_sect.S boot_sect_fat.h $(TOPDIR)/include/autoconf.h

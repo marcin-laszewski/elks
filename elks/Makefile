@@ -127,6 +127,10 @@ tools:
 	-$(RM) include/linuxmt/compiler-generated.h
 	-$(RM) kernel/version.o
 
+.PHONY: tools-elf2elks
+tools-elf2elks:
+	${MAKE} -C tools elf2elks
+
 #########################################################################
 # Compiler-generated definitions not given as command arguments.
 
