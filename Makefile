@@ -9,13 +9,13 @@ LIB86	= elks/arch/i86/lib/lib86.a
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all:  kernel boot elkscmd image
+all: image
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
 
 .PHONY: image
-image: .config include/autoconf.h
+image: .config include/autoconf.h kernel boot elkscmd
 	$(MAKE) -C image all
 
 .PHONY: kernel
