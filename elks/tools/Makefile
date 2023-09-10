@@ -26,13 +26,12 @@ include $(BASEDIR)/Makefile-rules
 
 #########################################################################
 # Commands.
-all:
+all: elf2elks
 	$(MAKE) -C mfs all
 	$(MAKE) -C mfsck all
 	$(MAKE) -C mkromfs all
 	$(MAKE) -C setboot all
 	$(MAKE) -C objdump86 all
-	$(MAKE) -C elf2elks all
 	$(MAKE) -C elks-compress all
 	$(MAKE) -C eman all
 
