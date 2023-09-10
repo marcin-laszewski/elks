@@ -10,7 +10,7 @@
 #########################################################################
 # Relative path to base directory.
 
-TARBALL		= lib/elftoolchain-0.7.1.tar.bz2
+TARBALL		= elftoolchain-0.7.1.tar.bz2
 LIBELF 		= src/libelf/libelf.a
 OBJS		= elf2elks.o
 OUT		= ../bin/elf2elks
@@ -28,11 +28,11 @@ elf2elks.o: elf2elks.c $(LIBELF)
 # make.  To avoid roping in BSD make as yet another dependency, we directly
 # run the commands to generate and compile the libelf sources here.  This
 # still requires m4 as a dependency though.
-$(LIBELF): $(TARBALL) lib/elftoolchain.patch
+$(LIBELF): $(TARBALL) elftoolchain.patch
 	$(RM) -r src
 	mkdir src
 	tar xjf $(TARBALL) -C src --strip-components=1
-	cd src && patch -p1 < ../lib/elftoolchain.patch
+	cd src && patch -p1 < ../elftoolchain.patch
 ifeq "Linux" "$(shell uname -s)"
 	cd src/common && ./native-elf-format > native-elf-format.h
 endif
