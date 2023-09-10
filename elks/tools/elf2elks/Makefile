@@ -10,46 +10,17 @@
 #########################################################################
 # Relative path to base directory.
 
-BASEDIR 	= ../..
+TARBALL		= lib/elftoolchain-0.7.1.tar.bz2
+LIBELF 		= src/libelf/libelf.a
+OBJS		= elf2elks.o
+OUT		= ../bin/elf2elks
 
-#########################################################################
-# Define the variables required by the standard rules - see the standard
-# rules file (below) for details of these variables.
+CFLAGS	+= -Isrc/libelf -Isrc/common
 
-USEBCC 		= N
+all: $(OUT)
 
-CLEANDEP	=
-
-CLEANME 	= ../bin/elf2elks
-
-DEPEND  	=
-
-DISTFILES	=
-
-NOINDENT	=
-
-#########################################################################
-# Include standard commands.
-
-include $(BASEDIR)/Makefile-rules
-
-ELFTOOLCHAIN = lib/elftoolchain-0.7.1
-INCLUDES	+= -I$(TOPDIR)/elks/tools/elf2elks/$(ELFTOOLCHAIN)/libelf \
-		   -I$(TOPDIR)/elks/tools/elf2elks/$(ELFTOOLCHAIN)/common
-
-#########################################################################
-# Objects to be compiled.
-
-LIBELF		= $(ELFTOOLCHAIN)/libelf/libelf.a
-OBJS		= elf2elks.o $(LIBELF)
-
-#########################################################################
-# Commands.
-
-all:	../bin/elf2elks
-
-../bin/elf2elks: $(OBJS)
-	$(CC) -o ../bin/elf2elks $(CFLAGS) $(OBJS)
+$(OUT): $(OBJS) $(LIBELF)
+	$(CC) -o $@ $^
 
 elf2elks.o: elf2elks.c $(LIBELF)
 
@@ -57,29 +28,29 @@ elf2elks.o: elf2elks.c $(LIBELF)
 # make.  To avoid roping in BSD make as yet another dependency, we directly
 # run the commands to generate and compile the libelf sources here.  This
 # still requires m4 as a dependency though.
-$(LIBELF): $(ELFTOOLCHAIN).tar.bz2 lib/elftoolchain.patch
-	$(RM) -r $(ELFTOOLCHAIN)
-	cd lib && tar xjf elftoolchain-0.7.1.tar.bz2
-	cd $(ELFTOOLCHAIN) && patch -p1 <'$(abspath lib/elftoolchain.patch)'
+$(LIBELF): $(TARBALL) lib/elftoolchain.patch
+	$(RM) -r src
+	mkdir src
+	tar xjf $(TARBALL) -C src --strip-components=1
+	cd src && patch -p1 < ../lib/elftoolchain.patch
 ifeq "Linux" "$(shell uname -s)"
-	set -e; \
-	cd $(ELFTOOLCHAIN)/common; \
-	./native-elf-format > native-elf-format.h
+	cd src/common && ./native-elf-format > native-elf-format.h
 endif
-	set -e; \
-	cd $(ELFTOOLCHAIN)/libelf; \
-	m4 -DSRCDIR=. libelf_convert.m4 > libelf_convert.c; \
-	m4 -DSRCDIR=. libelf_fsize.m4 > libelf_fsize.c; \
-	m4 -DSRCDIR=. libelf_msize.m4 > libelf_msize.c; \
-	for src in *.c; \
-		do $(CC) $(CFLAGS) -c -I. -I../common "$$src"; done; \
-	$(RM) libelf.a; \
-	$(AR) $(ARFLAGS) libelf.a *.o
+	cd src/libelf \
+	&& m4 -DSRCDIR=. libelf_convert.m4 > libelf_convert.c \
+	&& m4 -DSRCDIR=. libelf_fsize.m4 > libelf_fsize.c \
+	&& m4 -DSRCDIR=. libelf_msize.m4 > libelf_msize.c \
+	&& for src in *.c; \
+		do \
+			$(CC) $(CFLAGS) -c -I. -I../common "$$src"; \
+		done \
+	&& $(RM) libelf.a \
+	&& $(AR) r libelf.a *.o
 
-doclean: elftoolchain-doclean
+.PHONY: distclean
+distclean: clean
+	find . -name '*~' | xargs $(RM) $(OUT)
 
-elftoolchain-doclean:
-	$(RM) -r $(ELFTOOLCHAIN)
-
-#########################################################################
-### Dependencies:
+.PHONY: clean
+clean:
+	$(RM) -r $(OBJS) $(LIBELF) src/
