@@ -28,7 +28,7 @@ boot: .config include/autoconf.h
 	$(MAKE) -C bootblocks all
 
 .PHONY: elkscmd
-elkscmd: .config include/autoconf.h
+elkscmd: .config include/autoconf.h libc
 	$(MAKE) -C elkscmd all
 
 clean: libc-clean libc-uninstall
