@@ -1,43 +1,15 @@
-# Note that the standard Makefile rules and defines have been moved to
-# the file below.
+OUTS = mfs mfsck mkromfs setboot objdump86 elf2elks elks-compress eman
+CLEANS = $(addprefix clean-,$(OUTS))
 
-BASEDIR 	= ..
+all: $(OUTS)
 
-#########################################################################
-# Define the variables required by the standard rules - see the standard
-# rules file (below) for details of these variables.
+.PHONY: $(OUTS)
+$(OUTS):
+	$(MAKE) -C $@
 
-USEBCC 		= N
+.PHONY: clean
+clean: $(CLEANS)
 
-CLEANDEP	= 
-
-CLEANME 	= 
-
-DEPEND  	= 
-
-DISTFILES	= 
-
-NOINDENT	= 
-
-#########################################################################
-# Include the standard rules.
-
-include $(BASEDIR)/Makefile-rules
-
-#########################################################################
-# Commands.
-all: elf2elks
-	$(MAKE) -C mfs all
-	$(MAKE) -C mfsck all
-	$(MAKE) -C mkromfs all
-	$(MAKE) -C setboot all
-	$(MAKE) -C objdump86 all
-	$(MAKE) -C elks-compress all
-	$(MAKE) -C eman all
-
-.PHONY: elf2elks
-elf2elks:
-	$(MAKE) -C elf2elks all
-
-#########################################################################
-### Dependencies:
+.PHONY: $(CLEANS)
+$(CLEANS):
+	$(MAKE) -C $(subst clean-,,$@) clean
