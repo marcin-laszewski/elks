@@ -1,59 +1,30 @@
-# Minix filesystem manipulation tool
-#
-#########################################################################
-#
-# Note! Dependencies are done automagically by 'make dep', which also
-# removes any old dependencies. DON'T put your own dependencies here
-# unless it's something special (ie not a .c file).
-#
-#########################################################################
-# Relative path to base directory.
+CFLAGS	+= -Wall
+OUTS	= ../bin/elks-compress ../bin/exomizer
+OBJS	= elks-compress.o
 
-BASEDIR 	= ../..
-
-#########################################################################
-# Define the variables required by the standard rules - see the standard
-# rules file (below) for details of these variables.
-
-USEBCC 		= N
-
-CLEANDEP	=
-
-CLEANME 	= ../bin/elks-compress ../bin/exomizer
-
-DEPEND  	=
-
-DISTFILES	=
-
-NOINDENT	=
-
-#########################################################################
-# Include standard commands.
-
-include $(BASEDIR)/Makefile-rules
-
-#########################################################################
-# Objects to be compiled.
-
-SRCS=elks-compress.c
-OBJS=$(SRCS:.c=.o)
-
-#########################################################################
-# Commands.
-
-all:	../bin/elks-compress ../bin/exomizer
+all: $(OUTS)
 
 ../bin/elks-compress: minix.h $(OBJS)
 	$(CC) -o ../bin/elks-compress $(CFLAGS) $(OBJS)
 
-../bin/exomizer:
-	$(MAKE) -C exomizer/src
-	cp -p exomizer/src/exomizer ../bin/exomizer
+../bin/exomizer: exomizer/src/exomizer
+	cp -p $< $@
 
-doclean: elks-compress-doclean
+.PHONY: exomizer/src/exomizer
+exomizer/src/exomizer:
+	$(MAKE) -C $(dir $@)
 
-elks-compress-doclean:
+.PHONY: distclean
+distclean: clean
+	find . -name '*~' | xargs $(RM) $(OUTS)
+
+.PHONY: clean
+clean: clean-elks-compress clean-exomizer
+
+.PHONY: clean-elks-compress
+clean-elks-compress:
+	$(RM) $(OBJS)
+
+.PHONY: clean-exomizer
+clean-exomizer:
 	$(MAKE) -C exomizer/src clean
-
-#########################################################################
-### Dependencies:
