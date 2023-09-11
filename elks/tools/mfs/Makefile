@@ -1,50 +1,22 @@
-# Minix filesystem manipulation tool
-#
-#########################################################################
-#
-# Note! Dependencies are done automagically by 'make dep', which also
-# removes any old dependencies. DON'T put your own dependencies here
-# unless it's something special (ie not a .c file).
-#
-#########################################################################
-# Relative path to base directory.
+CFLAGS	+= -Wall
+#CFLAGS	+= -O
+#CFLAGS	+= -g
 
-BASEDIR 	= ../..
+OUT	= ../bin/mfs
+OBJS	= mkfs.o genfs.o dir.o iname.o inode.o main.o reader.o \
+		super.o utils.o writer.o getoptx.o
 
-#########################################################################
-# Define the variables required by the standard rules - see the standard
-# rules file (below) for details of these variables.
+all: $(OUT)
 
-USEBCC 		= N
+$(OUT):  $(OBJS)
+	$(CC) -o $@ $(CFLAGS) $(OBJS)
 
-CLEANDEP	=
+$(OBJS): minix_fs.h bitops.h protos.h
 
-CLEANME 	= ../bin/mfs
+.PHONY: distclean
+distclean: clean
+	find . -name '*~' | xargs $(RM) $(OUT)
 
-DEPEND  	=
-
-DISTFILES	=
-
-NOINDENT	=
-
-#########################################################################
-# Include standard commands.
-
-include $(BASEDIR)/Makefile-rules
-
-#########################################################################
-# Objects to be compiled.
-
-SRCS=mkfs.c genfs.c dir.c iname.c inode.c main.c reader.c super.c utils.c writer.c getoptx.c
-OBJS=$(SRCS:.c=.o)
-
-#########################################################################
-# Commands.
-
-all:	../bin/mfs
-
-../bin/mfs: minix_fs.h bitops.h protos.h $(OBJS)
-	$(CC) -o ../bin/mfs $(CFLAGS) $(OBJS)
-
-#########################################################################
-### Dependencies:
+.PHONY: clean
+clean:
+	$(RM) $(OBJS)
