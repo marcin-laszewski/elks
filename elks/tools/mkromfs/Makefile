@@ -1,55 +1,21 @@
-# Makefile for the Linux/MT-kernel.
-#
-#########################################################################
-#
-# Note! Dependencies are done automagically by 'make dep', which also
-# removes any old dependencies. DON'T put your own dependencies here
-# unless it's something special (ie not a .c file).
-#
-#########################################################################
-# Relative path to base directory.
+CFLAGS	+= -Wall
+OUT	= ../bin/mkromfs
+OBJS	= mkromfs.o list.o
 
-BASEDIR 	= ../..
+all: $(OUT)
 
-#########################################################################
-# Define the variables required by the standard rules - see the standard
-# rules file (below) for details of these variables.
+$(OUT): $(OBJS)
+	$(CC) -o $@ $^
 
-USEBCC 		= N
+$(OBJS): list.h
 
-CLEANDEP	=
+.PHONY: distclean
+distclean: clean
+	find . -name '*~' | xargs $(RM) $(OUT)
 
-CLEANME 	= ../bin/mkromfs
+.PHONY: clean
+clean:
+	$(RM) $(OBJS)
 
-DEPEND  	=
-
-DISTFILES	=
-
-NOINDENT	=
-
-#########################################################################
-# Include standard commands.
-
-include $(BASEDIR)/Makefile-rules
-
-#########################################################################
-# Objects to be compiled.
-
-OBJS  = mkromfs.o list.o
-
-#########################################################################
-# Commands.
-
-all:	../bin/mkromfs
-
-../bin/mkromfs: $(OBJS)
-	$(CC) -o ../bin/mkromfs $(OBJS)
-
-#########################################################################
-# Standard commands.
-
-distdir:
-	cp -pf Makefile *.c $(DISTDIR)/tools
-
-#########################################################################
-### Dependencies:
+#distdir:
+#	cp -pf Makefile *.c $(DISTDIR)/tools
