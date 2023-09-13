@@ -229,7 +229,12 @@ endif
 
 .PHONY: clean
 
-clean:
-	@echo "CLEAN	$(SUBDIRS)"
-	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
+CLEANS	= $(addprefix clean-,$(SUBDIRS))
+
+clean: $(CLEANS)
 	$(RM) -r build-ml *.o libc.a
+
+.PHONY: $(CLEANS)
+$(CLEANS):
+	@echo "CLEAN	$@"
+	$(MAKE) -C $(subst clean-,,$@) clean
