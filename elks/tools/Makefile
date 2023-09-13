@@ -13,3 +13,7 @@ clean: $(CLEANS)
 .PHONY: $(CLEANS)
 $(CLEANS):
 	$(MAKE) -C $(subst clean-,,$@) clean
+
+nodep:
+
+doclean: $(CLEANS)
