@@ -230,5 +230,6 @@ endif
 .PHONY: clean
 
 clean:
+	@echo "CLEAN	$(SUBDIRS)"
 	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
 	$(RM) -r build-ml *.o libc.a
