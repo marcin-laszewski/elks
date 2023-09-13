@@ -53,6 +53,7 @@
 #include <arch/system.h>
 #include <arch/irq.h>
 #include <arch/ports.h>
+#include "bioshd.h"
 
 #define PER_DRIVE_INFO  1       /* =1 for per-line display of drive info at init */
 #define DEBUG_PROBE     0       /* =1 to display more floppy probing information */
@@ -60,21 +61,6 @@
 #define FULL_TRACK      0       /* =1 to read full tracks when track caching */
 //#define IODELAY       5       /* times 10ms, emulated delay for floppy on QEMU */
 #define MAX_ERRS        5       /* maximum sector read/write error retries */
-
-/* the following must match with /dev minor numbering scheme*/
-#define NUM_MINOR       32      /* max minor devices per drive*/
-#define MINOR_SHIFT     5       /* =log2(NUM_MINOR) shift to get drive num*/
-#define MAX_DRIVES      8       /* =256/NUM_MINOR*/
-#define DRIVE_HD0       0
-#define DRIVE_FD0       4       /* =MAX_DRIVES/2 first floppy drive*/
-
-#define HD_DRIVES       4       /* max hard drives */
-#ifdef CONFIG_ARCH_PC98
-#define FD_DRIVES       4
-#else
-#define FD_DRIVES       2       /* max floppy drives */
-#endif
-#define NUM_DRIVES      (HD_DRIVES+FD_DRIVES) /* max number of drives (<=256/NUM_MINOR) */
 
 #define MAJOR_NR        BIOSHD_MAJOR
 #define BIOSDISK
@@ -100,7 +86,6 @@ struct drive_infot *last_drive;         /* set to last drivep-> used in read/wri
 extern struct drive_infot fd_types[];   /* BIOS floppy formats */
 
 static struct hd_struct hd[NUM_DRIVES << MINOR_SHIFT];  /* partitions start, size*/
-//static int hd_sizes[NUM_DRIVES << MINOR_SHIFT];       /* used only with BDEV_SIZE_CHK*/
 
 static int bioshd_open(struct inode *, struct file *);
 static void bioshd_release(struct inode *, struct file *);
@@ -115,7 +100,6 @@ static struct gendisk bioshd_gendisk = {
     NUM_DRIVES,                 /* maximum number of drives */
     bioshd_geninit,             /* init function */
     hd,                         /* hd struct */
-    0,//hd_sizes,               /* sizes not blocksizes */
     0,                          /* hd drives found */
     drive_info,
     NULL                        /* next */
@@ -126,6 +110,7 @@ static void set_cache_invalid(void)
     cache_drive = NULL;
 }
 
+#ifdef CONFIG_BLK_DEV_BFD
 static int read_sector(int drive, int cylinder, int sector)
 {
     int count = 2;              /* one retry on probe or boot sector read */
@@ -145,7 +130,6 @@ static int read_sector(int drive, int cylinder, int sector)
     return 1;                   /* error */
 }
 
-#ifdef CONFIG_BLK_DEV_BFD
 static void probe_floppy(int target, struct hd_struct *hdp)
 {
     /* Check for disk type */
@@ -378,7 +362,7 @@ void INITPROC bioshd_init(void)
     /* FIXME perhaps remove for speed on floppy boot*/
     outb_p(0x0C, FDC_DOR);      /* FD motors off, enable IRQ and DMA*/
 
-#ifdef CONFIG_BLK_DEV_BFD
+#if defined(CONFIG_BLK_DEV_BFD) || defined(CONFIG_BLK_DEV_BFD_HARD)
     fd_count = bios_getfdinfo(&drive_info[DRIVE_FD0]);
 #endif
 #ifdef CONFIG_BLK_DEV_BHD
@@ -729,7 +713,7 @@ next_block:
         start = req->rq_sector;
 
         if (hd[minor].start_sect == -1U || start >= hd[minor].nr_sects) {
-            printk("bioshd: bad partition start=%ld sect=%ld nr_sects=%ld.\n",
+            printk("bioshd: sector %ld access beyond partition (%ld,%ld)\n",
                 start, hd[minor].start_sect, hd[minor].nr_sects);
             end_request(0);
             continue;
@@ -738,10 +722,12 @@ next_block:
 
         buf = req->rq_buffer;
         while (count > 0) {
-            int num_sectors;
+            int num_sectors = 0;
 #ifdef CONFIG_TRACK_CACHE
-            /* first try reading track cache*/
-            num_sectors = do_cache_read(drivep, start, buf, req->rq_seg, req->rq_cmd);
+            if (drivep - drive_info >= DRIVE_FD0) {
+                /* first try reading track cache*/
+                num_sectors = do_cache_read(drivep, start, buf, req->rq_seg, req->rq_cmd);
+            }
             if (!num_sectors)
 #endif
                 /* then fallback with retries if required*/
