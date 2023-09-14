@@ -15,7 +15,7 @@ LIBELF 		= src/libelf/libelf.a
 OBJS		= elf2elks.o
 OUT		= ../bin/elf2elks
 
-CFLAGS	+= -Isrc/libelf -Isrc/common
+CFLAGS_ADD	= -Isrc/libelf -Isrc/common
 
 all: $(OUT)
 
@@ -23,6 +23,7 @@ $(OUT): $(OBJS) $(LIBELF)
 	$(CC) -o $@ $^
 
 elf2elks.o: elf2elks.c $(LIBELF)
+	$(CC) -c -o $@ $(CFLAGE) $(CFLAGS_ADD) $<
 
 # libelf has its own makefile for building, but the makefile requires BSD
 # make.  To avoid roping in BSD make as yet another dependency, we directly
@@ -42,7 +43,7 @@ endif
 	&& m4 -DSRCDIR=. libelf_msize.m4 > libelf_msize.c \
 	&& for src in *.c; \
 		do \
-			$(CC) $(CFLAGS) -c -I. -I../common "$$src"; \
+			$(CC) $(CFLAGS) $(CFLAGS_ADD) -c -I. -I../common "$$src"; \
 		done \
 	&& $(RM) libelf.a \
 	&& $(AR) r libelf.a *.o
