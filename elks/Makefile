@@ -69,11 +69,8 @@ endif
 #########################################################################
 # Define commands.
 
-Image: $(TOPDIR)/include/autoconf.h tools $(ARCHIVES) init/main.o
-	$(MAKE) -C $(ARCH_DIR) Image
-
-nbImage: $(TOPDIR)/include/autoconf.h $(ARCHIVES) init/main.o tools
-	${MAKE} -C $(ARCH_DIR) nbImage
+Image nbImage: $(TOPDIR)/include/autoconf.h tools $(ARCHIVES) init/main.o
+	$(MAKE) -C $(ARCH_DIR) $@
 
 nb_install: nbImage
 	cp -f $(ARCH_DIR)/boot/nbImage $(TARGET_NB_IMAGE)
@@ -83,11 +80,8 @@ nbrd_install: nbImage
 	cat $(ARCH_DIR)/boot/nbRamdisk >> $(ARCH_DIR)/boot/nbImage.rd
 	cp -f $(ARCH_DIR)/boot/nbImage.rd $(TARGET_NB_IMAGE)
 
-boot: Image
-	${MAKE} -C $(ARCH_DIR) boot
-
-disk: Image
-	${MAKE} -C $(ARCH_DIR) disk
+boot disk: Image
+	$(MAKE) -C $(ARCH_DIR) $@
 
 setup: $(ARCH_DIR)/boot/setup
 	${MAKE} -C $(ARCH_DIR) setup
