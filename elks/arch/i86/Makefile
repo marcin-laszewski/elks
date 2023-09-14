@@ -85,8 +85,8 @@ toolkit:
 	${MAKE} -C tools all
 
 $(BASEDIR)/include/arch/asm-offsets.h: kernel/asm-offsets.c asm-offsets.awk
-	$(CC) $(CFLAGS) -S -o asm-offsets.s kernel/asm-offsets.c
-	awk -f asm-offsets.awk asm-offsets.s > $(BASEDIR)/include/arch/asm-offsets.h
+	$(CC) $(CFLAGS) -S -o asm-offsets.s $<
+	awk -f asm-offsets.awk asm-offsets.s > $@
 	$(RM) asm-offsets.s
 
 #########################################################################
