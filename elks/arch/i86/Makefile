@@ -68,18 +68,18 @@ LIBGCC = "`$(CC) $(CFLAGS) -print-libgcc-file-name`"
 .PHONY: toolkit
 
 boot/bootsect:   boot/bootsect.o
-	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o boot/bootsect boot/bootsect.o > boot/bootsect.map
-	$(POSTLINK) --tiny boot/bootsect
+	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o $@ $< > $(basename $@).map
+	$(POSTLINK) --tiny $@
 
 boot/netbootsect:	boot/netbootsect.o
-	$(LD) $(LDFLAGS) -M $(ARCH_LD) -s -o boot/netbootsect boot/netbootsect.o > boot/netbootsect.map
-	$(POSTLINK) boot/netbootsect
+	$(LD) $(LDFLAGS) -M $(ARCH_LD) -s -o $@ $< > $(basename $@).map
+	$(POSTLINK) $@
 
 boot/netbootsect.o:	boot/netbootsect.s
 
 boot/setup:   boot/setup.o
-	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o boot/setup boot/setup.o > boot/setup.map
-	$(POSTLINK) --tiny boot/setup
+	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o $@ $< > $(basename $@).map
+	$(POSTLINK) --tiny $@
 
 toolkit:
 	${MAKE} -C tools all
