@@ -123,7 +123,7 @@ net/net.a:
 	${MAKE} -C net net.a
 
 tools:
-	${MAKE} -C tools all
+	${MAKE} -C tools all CC=cc CFLAGS= AR=ar
 	-$(RM) include/linuxmt/compiler-generated.h
 	-$(RM) kernel/version.o
 
