@@ -68,6 +68,10 @@ LIBGCC = "`$(CC) $(CFLAGS) -print-libgcc-file-name`"
 .PHONY: toolkit
 
 boot/bootsect:   boot/bootsect.o
+
+boot/setup:   boot/setup.o
+
+boot/bootsect boot/setup:
 	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o $@ $< > $(basename $@).map
 	$(POSTLINK) --tiny $@
 
@@ -76,10 +80,6 @@ boot/netbootsect:	boot/netbootsect.o
 	$(POSTLINK) $@
 
 boot/netbootsect.o:	boot/netbootsect.s
-
-boot/setup:   boot/setup.o
-	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o $@ $< > $(basename $@).map
-	$(POSTLINK) --tiny $@
 
 toolkit:
 	${MAKE} -C tools all
@@ -145,23 +145,13 @@ setup:	toolkit boot/setup
 .PHONY: kernel/akernel.a lib/lib86.a mm/mm.a drivers/char/chr_drv.a \
 	drivers/block/blk_drv.a drivers/net/net_drv.a
 
-kernel/akernel.a:
-	${MAKE} -C kernel akernel.a
-
-lib/lib86.a:
-	${MAKE} -C lib lib86.a
-
-mm/mm.a:
-	${MAKE} -C mm mm.a
-
-drivers/char/chr_drv.a:
-	${MAKE} -C drivers/char chr_drv.a
-
-drivers/block/blk_drv.a:
-	${MAKE} -C drivers/block blk_drv.a
-
+kernel/akernel.a \
+lib/lib86.a \
+mm/mm.a \
+drivers/char/chr_drv.a \
+drivers/block/blk_drv.a \
 drivers/net/net_drv.a:
-	${MAKE} -C drivers/net net_drv.a
+	$(MAKE) -C $(dir $@) $(notdir $@)
 
 #########################################################################
 # commands.
