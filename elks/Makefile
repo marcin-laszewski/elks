@@ -100,27 +100,12 @@ setup: $(ARCH_DIR)/boot/setup
 .PHONY: fs/fs.a fs/msdos/msdos.a fs/minix/minixfs.a fs/romfs/romfs.a \
         kernel/kernel.a lib/lib.a net/net.a tools
 
-fs/fs.a:
-	${MAKE} -C fs fs.a
-
-fs/msdos/msdos.a:
-	${MAKE} -C fs/msdos msdos.a
-
-fs/minix/minixfs.a:
-	${MAKE} -C fs/minix minixfs.a
-
-fs/romfs/romfs.a: tools
-	${MAKE} -C fs/romfs romfs.a
+fs/fs.a fs/minix/minixfs.a fs/msdos/msdos.a fs/romfs/romfs.a lib/lib.a net/net.a:
+	$(MAKE) -C $(dir $@) $(notdir $@)
 
 kernel/kernel.a:	include/linuxmt/compiler-generated.h
 	@sed 's/^/ Q> /' < include/linuxmt/compiler-generated.h
 	${MAKE} -C kernel kernel.a
-
-lib/lib.a:
-	${MAKE} -C lib lib.a
-
-net/net.a:
-	${MAKE} -C net net.a
 
 tools:
 	${MAKE} -C tools all CC=cc CFLAGS= AR=ar
