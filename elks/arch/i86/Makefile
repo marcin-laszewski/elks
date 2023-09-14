@@ -142,15 +142,15 @@ setup:	toolkit boot/setup
 
 # Build archives and add them to the list of things to link into kernel image
 
-.PHONY: kernel/akernel.a lib/lib86.a mm/mm.a drivers/char/chr_drv.a \
-	drivers/block/blk_drv.a drivers/net/net_drv.a
+KLIBS = \
+ kernel/akernel.a \
+ lib/lib86.a mm/mm.a \
+ drivers/char/chr_drv.a \
+ drivers/block/blk_drv.a \
+ drivers/net/net_drv.a \
 
-kernel/akernel.a \
-lib/lib86.a \
-mm/mm.a \
-drivers/char/chr_drv.a \
-drivers/block/blk_drv.a \
-drivers/net/net_drv.a:
+.PHONY: $(KLIBS)
+$(KLIBS):
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 #########################################################################
