@@ -70,7 +70,7 @@ endif
 # Define commands.
 
 Image: $(TOPDIR)/include/autoconf.h tools $(ARCHIVES) init/main.o
-	cd $(ARCH_DIR) && $(MAKE) Image
+	$(MAKE) -C $(ARCH_DIR) Image
 
 nbImage: $(TOPDIR)/include/autoconf.h $(ARCHIVES) init/main.o tools
 	${MAKE} -C $(ARCH_DIR) nbImage
