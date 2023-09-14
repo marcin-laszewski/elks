@@ -41,7 +41,7 @@ bootblocks/mbr_autogen.c:
 
 .PHONY: tools-elf2elks
 tools-elf2elks:
-	$(MAKE) -C elks tools-elf2elks
+	$(MAKE) -C elks/tools/elf2elks CC=cc CFLAGS= AR=ar
 
 .PHONY: $(LIB86)
 $(LIB86):
