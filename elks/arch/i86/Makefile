@@ -124,8 +124,8 @@ boot/Image: toolkit boot/bootsect boot/setup boot/system
 .PHONY: nbImage
 nbImage: boot/nbImage
 
-boot/nbImage:	Image boot/netbootsect
-	tools/mknbi-elks $(filter-out Image,$^) boot/Image $@
+boot/nbImage: boot/netbootsect boot/Image
+	tools/mknbi-elks $^ $@
 
 else
 
