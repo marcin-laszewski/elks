@@ -43,7 +43,7 @@ endif
 AARCHIVES = kernel/akernel.a lib/lib86.a mm/mm.a
 
 ARCHIVES := \
- $(addprefix ../../,$(ARCHIVES)) \
+ $(addprefix $(BASEDIR)/,$(ARCHIVES)) \
  kernel/akernel.a \
  lib/lib86.a \
  mm/mm.a \
@@ -109,7 +109,7 @@ boot/system-full.map: boot/system.elf
 
 boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
 	$(LD) -o $@ $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
-		boot/crt0.o ../../init/main.o \
+		boot/crt0.o $(BASEDIR)/init/main.o \
 		'-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
 	> $(basename $@)-full.map
 
