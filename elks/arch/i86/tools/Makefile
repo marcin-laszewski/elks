@@ -24,7 +24,7 @@ NOINDENT	=
 ###########################################################################
 # Include the standard rules.
 
-include $(BASEDIR)/Makefile-rules
+INCLUDES	+= -I$(BASEDIR)/include/ -I$(BASEDIR)/../include/
 
 ###########################################################################
 # SIBO paramters.
