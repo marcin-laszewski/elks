@@ -116,11 +116,15 @@ boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
 
 ifneq ($(CONFIG_ROMCODE), y)
 
-Image:	toolkit boot/bootsect boot/setup boot/system
+Image:	boot/Image
+
+boot/Image: toolkit boot/bootsect boot/setup boot/system
 	tools/build boot/bootsect boot/setup boot/system > boot/Image
 
 .PHONY: nbImage
-nbImage:	Image boot/netbootsect
+nbImage: boot/nbImage
+
+boot/nbImage:	Image boot/netbootsect
 	tools/mknbi-elks boot/netbootsect boot/Image boot/nbImage
 
 else
@@ -129,7 +133,9 @@ ifeq ($(CONFIG_ROM_BOOTABLE_BY_RESET), y)
     RVECT = -r $(CONFIG_ROM_RESET_ADDRESS)   
 endif
 
-Image:	toolkit boot/setup boot/system  
+Image:	boot/Image
+
+boot/Image:	toolkit boot/setup boot/system
 	tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(CONFIG_ROM_CHECKSUM_SIZE) boot/Image $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
 	$(CONFIG_ROM_SIMULATOR_PROGRAM)
 
