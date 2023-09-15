@@ -146,12 +146,12 @@ endif
 #########################################################################
 # Other commands.
 
-.PHONY: boot
-boot:	boot/Image
-	dd if=$< of=/dev/fd0 bs=8192
+.PHONY: boot-fd0
+boot-fd0: boot/Image
+	dd if=$< of=/dev/$(subst boot-,,$@) bs=8192
 
 .PHONY: disk
-disk:	boot
+disk:	boot-fd0
 
 .PHONY: setup
 setup:	toolkit boot/setup  
