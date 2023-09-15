@@ -147,8 +147,8 @@ endif
 # Other commands.
 
 .PHONY: boot
-boot:	Image
-	dd if=boot/Image of=/dev/fd0 bs=8192
+boot:	boot/Image
+	dd if=$< of=/dev/fd0 bs=8192
 
 .PHONY: disk
 disk:	boot
