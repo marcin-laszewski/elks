@@ -42,16 +42,18 @@ endif
 
 AARCHIVES = kernel/akernel.a lib/lib86.a mm/mm.a
 
-ARCHIVES := $(ARCHIVES) $(ARCH_DIR)/kernel/akernel.a \
-	$(ARCH_DIR)/lib/lib86.a \
-	$(ARCH_DIR)/mm/mm.a
+ARCHIVES := \
+ $(addprefix ../../,$(ARCHIVES)) \
+ kernel/akernel.a \
+ lib/lib86.a \
+ mm/mm.a \
 
 ADRIVERS = drivers/char/chr_drv.a drivers/block/blk_drv.a drivers/net/net_drv.a
 
 DRIVERS := $(DRIVERS) \
-	$(ARCH_DIR)/drivers/char/chr_drv.a \
-	$(ARCH_DIR)/drivers/block/blk_drv.a \
-	$(ARCH_DIR)/drivers/net/net_drv.a
+ drivers/char/chr_drv.a \
+ drivers/block/blk_drv.a \
+ drivers/net/net_drv.a
 
 XINCLUDE = $(BASEDIR)/include/arch/asm-offsets.h
 
@@ -106,12 +108,10 @@ boot/system.map: boot/system.elf
 boot/system-full.map: boot/system.elf
 
 boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
-	( cd $(BASEDIR) \
-	&& $(LD) $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
-		$(ARCH_DIR)/boot/crt0.o init/main.o \
-		'-(' $(ARCHIVES) $(DRIVERS) '-)' \
-		$(LIBGCC) -o $(ARCH_DIR)/$@ \
-	> $(ARCH_DIR)/$(basename $@)-full.map )
+	$(LD) -o $@ $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
+		boot/crt0.o ../../init/main.o \
+		'-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
+	> $(basename $@)-full.map
 
 ifneq ($(CONFIG_ROMCODE), y)
 
