@@ -94,14 +94,24 @@ $(BASEDIR)/include/arch/asm-offsets.h: kernel/asm-offsets.c asm-offsets.awk
 
 # Begin PC image build
 
-boot/system:	$(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
-	(cd $(BASEDIR) ; $(LD) $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
-		$(ARCH_DIR)/boot/crt0.o \
-		init/main.o '-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
-		-o $(ARCH_DIR)/boot/system > $(ARCH_DIR)/boot/system-full.map ; \
-		$(NM) $(ARCH_DIR)/boot/system | sed -e '/&/d; /!/d' | sort > \
-			$(ARCH_DIR)/boot/system.map; \
-		$(POSTLINK) --symfile $(ARCH_DIR)/boot/system.sym $(ARCH_DIR)/boot/system)
+boot/system.sym: boot/system
+
+boot/system: boot/system.elf
+		cp $< $@
+		$(POSTLINK) --symfile $(basename $@).sym $@
+
+boot/system.map: boot/system.elf
+		$(NM) $< | sed -e '/&/d; /!/d' | sort > $@
+
+boot/system-full.map: boot/system.elf
+
+boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
+	( cd $(BASEDIR) \
+	&& $(LD) $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
+		$(ARCH_DIR)/boot/crt0.o init/main.o \
+		'-(' $(ARCHIVES) $(DRIVERS) '-)' \
+		$(LIBGCC) -o $(ARCH_DIR)/$@ \
+	> $(ARCH_DIR)/$(basename $@)-full.map )
 
 ifneq ($(CONFIG_ROMCODE), y)
 
