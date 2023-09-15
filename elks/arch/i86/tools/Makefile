@@ -5,6 +5,11 @@
 
 BASEDIR 	= ../../..
 
+OUTS	= build mkbootloader
+ifeq ($(CONFIG_ARCH_SIBO), y)
+OUTS	+= wrt_disk.img imgconv
+endif
+
 #########################################################################
 # Define the variables required by the standard rules - see the standard
 # rules file (below) for details of these variables.
@@ -38,15 +43,7 @@ HEAP_SEG	= 0x800 	# Segment address
 ###########################################################################
 # Targets. You have to build the psion tree first to get driver stuff.
 
-ifeq ($(CONFIG_ARCH_SIBO), y)
-
-all: wrt_disk.img build mkbootloader imgconv
-
-else
-
-all: build mkbootloader
-
-endif
+all: $(OUTS)
 
 wrt_disk.o: wrt_disk.c
 
