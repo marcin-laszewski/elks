@@ -24,7 +24,7 @@ NOINDENT	=
 ###########################################################################
 # Include the standard rules.
 
-INCLUDES	+= -I$(BASEDIR)/include/ -I$(BASEDIR)/../include/
+CFLAGS	+= -I$(BASEDIR)/include/ -I$(BASEDIR)/../include/
 
 ###########################################################################
 # SIBO paramters.
@@ -61,9 +61,6 @@ wrt_disk.tmp: wrt_disk.o file.o
 
 wrt_disk.img: wrt_disk.tmp imgconv
 	./imgconv wrt_disk.tmp wrt_disk.img
-
-%: %.c
-	$(CC) $(INCLUDES) -o $@ $<
 
 ###########################################################################
 ### Dependencies:
