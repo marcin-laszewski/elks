@@ -67,8 +67,6 @@ LIBGCC = "`$(CC) $(CFLAGS) -print-libgcc-file-name`"
 #########################################################################
 # Things to make.
 
-.PHONY: toolkit
-
 boot/bootsect:   boot/bootsect.o
 
 boot/setup:   boot/setup.o
@@ -83,6 +81,7 @@ boot/netbootsect:	boot/netbootsect.o
 
 boot/netbootsect.o:	boot/netbootsect.s
 
+.PHONY: toolkit
 toolkit:
 	${MAKE} -C tools all
 
@@ -113,11 +112,14 @@ boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
 		'-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
 	> $(basename $@)-full.map
 
+.PHONY: Image
+
 ifneq ($(CONFIG_ROMCODE), y)
 
 Image:	toolkit boot/bootsect boot/setup boot/system
 	tools/build boot/bootsect boot/setup boot/system > boot/Image
 
+.PHONY: nbImage
 nbImage:	Image boot/netbootsect
 	tools/mknbi-elks boot/netbootsect boot/Image boot/nbImage
 
@@ -138,11 +140,14 @@ endif
 #########################################################################
 # Other commands.
 
+.PHONY: boot
 boot:	Image
 	dd if=boot/Image of=/dev/fd0 bs=8192
 
+.PHONY: disk
 disk:	boot
 
+.PHONY: setup
 setup:	toolkit boot/setup  
 	tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(ROM_MAX_SETUP_SIZE) Image $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
 	$(CONFIG_ROM_SIMULATOR_PROGRAM)
@@ -166,6 +171,7 @@ $(KLIBS):
 #########################################################################
 # commands.
 
+.PHONY: distdir
 distdir:
 	mkdir -p $(DISTDIR)/arch/i86
 	cd $(DISTDIR)/arch/i86 && mkdir -p boot drivers kernel lib mm tools
