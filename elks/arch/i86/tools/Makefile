@@ -48,6 +48,10 @@ HEAP_SEG	= 0x800 	# Segment address
 .PHONY: all
 all: $(OUTS)
 
+.PHONY: clean
+clean:
+	$(RM) $(OUTS)
+
 wrt_disk.o: wrt_disk.c
 
 wrt_disk.tmp: wrt_disk.o file.o
