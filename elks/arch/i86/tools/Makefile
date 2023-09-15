@@ -45,6 +45,7 @@ HEAP_SEG	= 0x800 	# Segment address
 ###########################################################################
 # Targets. You have to build the psion tree first to get driver stuff.
 
+.PHONY: all
 all: $(OUTS)
 
 wrt_disk.o: wrt_disk.c
