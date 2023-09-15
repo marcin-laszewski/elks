@@ -63,13 +63,13 @@ wrt_disk.img: wrt_disk.tmp imgconv
 	./imgconv wrt_disk.tmp wrt_disk.img
 
 build: build.c
-	gcc $(INCLUDES) -o build build.c
+	$(CC) $(INCLUDES) -o build build.c
 
 mkbootloader: mkbootloader.c
-	gcc $(INCLUDES) -o mkbootloader mkbootloader.c
+	$(CC) $(INCLUDES) -o mkbootloader mkbootloader.c
 
 imgconv: imgconv.c
-	gcc -o imgconv imgconv.c
+	$(CC) -o imgconv imgconv.c
 
 ###########################################################################
 ### Dependencies:
