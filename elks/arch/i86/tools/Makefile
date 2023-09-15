@@ -5,6 +5,8 @@
 
 BASEDIR 	= ../../..
 
+include	../$(BASEDIR)/.config
+
 OUTS	= build mkbootloader
 ifeq ($(CONFIG_ARCH_SIBO), y)
 OUTS	+= wrt_disk.img imgconv
