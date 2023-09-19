@@ -57,7 +57,6 @@ extern void resetup_one_dev(struct gendisk *dev, int drive);
 #define DEVICE_NAME "rd"
 #define DEVICE_REQUEST do_rd_request
 #define DEVICE_NR(device) ((device) & 1)
-#define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
 #endif
@@ -68,21 +67,17 @@ extern void resetup_one_dev(struct gendisk *dev, int drive);
 #define DEVICE_NAME "ssd"
 #define DEVICE_REQUEST do_ssd_request
 #define DEVICE_NR(device) ((device) & 0)
-#define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
 #endif
 
 #ifdef FLOPPYDISK
 
-static void floppy_on(int nr);
-static void floppy_off(unsigned int nr);
+static void floppy_off(int nr);
 
 #define DEVICE_NAME "df"
-#define DEVICE_INTR do_floppy
 #define DEVICE_REQUEST do_fd_request
 #define DEVICE_NR(device) ((device) & 3)
-#define DEVICE_ON(device) floppy_on(DEVICE_NR(device))
 #define DEVICE_OFF(device) floppy_off(DEVICE_NR(device))
 
 #endif
@@ -92,7 +87,6 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_NAME "hd"
 #define DEVICE_REQUEST do_directhd_request
 #define DEVICE_NR(device) (MINOR(device)>>6)
-#define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
 #endif
@@ -102,7 +96,6 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_NAME "bioshd"
 #define DEVICE_REQUEST do_bioshd_request
 #define DEVICE_NR(device) (MINOR(device)>>MINOR_SHIFT)
-#define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
 #endif
@@ -112,7 +105,6 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_NAME "udd"
 #define DEVICE_REQUEST do_meta_request
 #define DEVICE_NR(device) (MINOR(device))
-#define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
 #endif
