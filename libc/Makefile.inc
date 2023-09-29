@@ -21,6 +21,9 @@ ASFLAGS=--32-segelf -mtune=i8086
 LDFLAGS=-mtune=i8086
 # This is used in subdirectories to quickly create a library archive without
 # a symbol index
+
+$(info Makefile.inc: MULTISUBDIR: $(MULTISUBDIR))
+
 ARFLAGS_SUB=cqS
 
 ifdef MULTISUBDIR
@@ -30,22 +33,32 @@ endif
 LIB_CPU=i86
 LIB_OS=ELKS
 
+ifndef V
+	V=@
+endif
+
 %.o: %.S
-	$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $*.tmp $<
-	$(AS) $(ASFLAGS) -o $*.o $*.tmp
-	$(RM) $*.tmp
+	@echo 'CC-S-o	$@'
+	@#echo "$(CFLAGS)"
+	$(V)$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $*.tmp $<
+	$(V)$(AS) $(ASFLAGS) -o $*.o $*.tmp
+	$(V)$(RM) $*.tmp
 
 ifdef MULTISUBDIR
+
 $(TOPDIR)/libc/build-ml/$(MULTISUBDIR)/%.o: %.S
-	$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $@.tmp $<
-	$(AS) $(ASFLAGS) -o $@ $@.tmp
-	$(RM) $@.tmp
+	@echo 'CC-build-ml	$@'
+	$(V)$(CC) -E $(MULTILIB) $(INCS) $(SDEFS) -MD -o $@.tmp $<
+	$(V)$(AS) $(ASFLAGS) -o $@ $@.tmp
+	$(V)$(RM) $@.tmp
 endif
 
 %.o: %.s
-	$(AS) $(ASFLAGS) -o $*.o $<
+	@echo 'AS-s-o'
+	$(V)$(AS) $(ASFLAGS) -o $*.o $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -MD -o $*.o $<
+	@echo 'CC	$@'
+	$(V)$(CC) $(CFLAGS) -c -MD -o $*.o $<
 
 -include *.d

@@ -1,12 +1,15 @@
 # Makefile of ELKS C Library
 
 ifndef TOPDIR
-$(error TOPDIR is not defined)
+TOPDIR	= ..
 endif
 
 include $(TOPDIR)/Make.defs
 
 include Makefile.inc
+
+DESTDIR ?= ../cross
+IA16_LIBDIR ?= $(DESTDIR)/ia16-elf/lib
 
 # Defines
 
@@ -28,12 +31,6 @@ SUBDIRS = \
 	termios \
 	time \
 	# end of list
-
-#SUBDIRS=list
-
-# Rules
-
-.PHONY: all $(SUBDIRS)
 
 # Stuff for handling multilibs (https://wiki.gentoo.org/wiki/Multilib),
 # which ia16-elf-gcc uses to support separate library files for multiple ABIs
@@ -93,148 +90,193 @@ BUILDMULTIS:=$(MAINMULTI)
 override DESTDIR=
 endif
 
-MAINMULTISUBDIR=$(firstword $(subst ;, ,$(MAINMULTI)))
-
 ifeq "" "$(BUILDMULTIS)"
 $(error no multilib variants to build for elks-libc)
 endif
-ifeq "" "$(MAINMULTISUBDIR)"
-$(error no main multilib variant to use)
-endif
 
-ifneq "" "$(MULTISUBDIR)"
+MULTISUBDIR	?= $(foreach ml,$(BUILDMULTIS),$(firstword $(subst ;, ,$(ml))))
+LIBS	= $(addsuffix /libc.a,$(addprefix build-ml/,$(MULTISUBDIR)))
 
-# Build one particular multilib variant of libc.a.  $(MULTISUBDIR) gives the
-# multilib variant to build for, and $(MULTILIB) gives the C compiler flags
-# to pass to GCC.
-all: $(LIBC) $(CRT0)
+TARGETS	= $(strip $(BUILDMULTIS))
 
-SUBDIRSINMULTILIB = $(SUBDIRS:%=$(TOPDIR)/libc/build-ml/$(MULTISUBDIR)/%)
-SUBLIBSINMULTILIB = $(SUBDIRSINMULTILIB:%=%/out.a)
+target_get = $(word $(2), $(subst ;, ,$(1)))
+target_name	= $(call target_get,$(1),1)
+target_args	= $(call target_get,$(1),2)
 
-$(LIBC): $(SUBLIBSINMULTILIB)
-	mkdir -p $(@D)
-	set -e; \
+TARGETS_NAME	= $(foreach t,$(TARGETS),$(call target_name,$(t)))
+
+TARGETS_CLEAN	= $(addprefix clean-,$(TARGETS_NAME))
+TARGETS_INSTALL	= $(addprefix install-,$(TARGETS_NAME))
+TARGETS_UNINSTALL	= $(addprefix uninstall-,$(TARGETS_NAME))
+
+TABS = \
+ $(DESTDIR)/share/misc/elks/call_tab.v \
+ $(DESTDIR)/share/misc/elks/defn_tab.v \
+
+
+.PHONY: all
+all: $(TARGETS_NAME)
+
+.PHONY: show
+show:
+	@echo 'IA16_LIBDIR	$(IA16_LIBDIR)'
+	@echo 'TARGETS	$(TARGETS)'
+	@echo 'TARGETS_NAME	$(TARGETS_NAME)'
+	@echo 'TARGETS_CLEAN	$(TARGETS_CLEAN)'
+	@echo 'TARGETS_INSTALL	$(TARGETS_INSTALL)'
+
+#--- clean ----------------------------------------
+.PHONY: clean
+clean: $(TARGETS_CLEAN)
+
+.PHONY: $(TARGETS_CLEAN)
+$(TARGETS_CLEAN): clean-%: $(foreach s,$(SUBDIRS),clean-lib-%/$(s))
+
+CLEAN_LIBS = $(foreach t,$(TARGETS_NAME),$(foreach s,$(SUBDIRS),clean-lib-$(t)/$(s)))
+
+.PHONY: $(CLEAN_LIBS)
+$(CLEAN_LIBS):
+	! test -d $(subst clean-lib-,build-ml/,$@) \
+	|| $(MAKE) \
+		-f $(abspath $(lastword $(subst /, ,$@)))/Makefile \
+		-C $(subst clean-lib-,build-ml/,$@) \
+		VPATH=$(abspath $(lastword $(subst /, ,$@))) \
+		clean
+
+#--- install -----------------------------------------------
+INCS_H = $(wildcard include/*.h include/arpa/*.h include/asm/*.h include/netinet/*.h include/sys/*.h)
+INCS_H += $(subst ../elks/,,$(wildcard ../elks/include/arch/*.h ../elks/include/linuxmt/*.h))
+
+.PHONY: install
+install: $(TARGETS_INSTALL)
+
+.PHONY: $(TARGETS_INSTALL)
+$(TARGETS_INSTALL): install-%: $(IA16_LIBDIR)/%/crt0.o
+$(TARGETS_INSTALL): install-%: $(IA16_LIBDIR)/%/libc.a
+$(TARGETS_INSTALL): install-%: $(IA16_LIBDIR)/%/include/autoconf.h
+$(TARGETS_INSTALL): $(TABS)
+$(TARGETS_INSTALL): $(IA16_LIBDIR)/rt-specs/r-elks.spec
+
+target_medium		= $(foreach t,$(TARGETS_INSTALL),$(if $(findstring /medium,$(t)),$(t),))
+target_no_medium	= $(foreach t,$(TARGETS_INSTALL),$(if $(findstring /medium,$(t)),,$(t)))
+
+$(call target_medium): install-%: $(IA16_LIBDIR)/%/elks-medium.ld
+
+$(call target_no_medium): install-%: $(IA16_LIBDIR)/%/elks-small.ld
+$(call target_no_medium): install-%: $(IA16_LIBDIR)/%/elks-tiny.ld
+
+$(IA16_LIBDIR)/%/elks-medium.ld: ../elks/elks-medium.ld
+	cp $^ $@
+
+$(IA16_LIBDIR)/%/elks-small.ld: ../elks/elks-small.ld
+	cp $^ $@
+
+$(IA16_LIBDIR)/%/elks-tiny.ld: ../elks/elks-tiny.ld
+	cp $^ $@
+
+$(IA16_LIBDIR)/%: build-ml/%
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(IA16_LIBDIR)/%/include/autoconf.h: ../include/autoconf.h
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(TARGETS_INSTALL): install-%: $(addprefix $(IA16_LIBDIR)/%/,$(INCS_H))
+#	@echo 'CHECK-H	$@'
+#	@for f in $^; \
+#	do \
+#		! test -f \
+#		&& echo "missing file: $$f" \
+#		&& exit 1; \
+#	done; \
+#	true
+
+# Install *.h: Create and use external file 'rules-h.mk',
+# because this rule does not work well:
+#$(foreach t,$(TARGETS_NAME),$(IA16_LIBDIR)/$(t)/%.h): %.h
+
+include rules-h.mk
+
+rules-h.mk:
+	@echo 'MK	$@'
+	@if ! for r in $(TARGETS_NAME); \
+		do \
+			echo "$(IA16_LIBDIR)/$$r/%.h: %.h"; \
+			echo '	@echo "CP	$$@"'; \
+			echo '	@mkdir -p $$(dir $$@)'; \
+			echo '	@cp $$^ $$@'; \
+			echo; \
+			echo "$(IA16_LIBDIR)/$$r/%.h: ../elks/%.h"; \
+			echo '	@echo "CP	$$@"'; \
+			echo '	@mkdir -p $$(dir $$@)'; \
+			echo '	@cp $$^ $$@'; \
+			echo; \
+		done > $@; \
+	then \
+		$(RM) $@; \
+		false; \
+	fi
+
+$(DESTDIR)/share/misc/elks/%.v: system/%.v
+	mkdir -p $(dir $@)
+	cp $^ $@
+
+$(IA16_LIBDIR)/rt-specs/r-elks.spec: $(TOPDIR)/elks/r-elks.spec
+	mkdir -p $(dir $@)
+	cp $^ $@
+
+#--- uninstall--------------------------------------
+.PHONY: uninstall
+uninstall: $(TARGETS_UNINSTALL)
+	$(RM) $(TABS) $(IA16_LIBDIR)/rt-specs/r-elks.spec
+
+.PHONY: $(TARGETS_UNINSTALL)
+$(TARGETS_UNINSTALL):
+	@echo '$@'
+	$(RM) -r $(addprefix $(IA16_LIBDIR)/$(subst uninstall-,,$@)/, \
+		crt0.o elks-medium.ld elks-small.ld elks-tiny.ld include libc.a)
+
+#--- build -----------------------------------------
+.PHONY: $(TARGETS_NAME)
+$(TARGETS_NAME): %: build-ml/%/crt0.o
+$(TARGETS_NAME): %: build-ml/%/libc.a
+
+get_param = $(subst @, -,$(subst $(1);,,$(filter $(1);%,$(TARGETS))))
+
+%.o: %.asm
+	$(AS) $(ASFLAGS) -o $@ $^
+
+build-ml/%/crt0.asm: crt0.S
+	mkdir -p $(dir $@)
+	$(CC) -E $(call get_param,$(subst /crt0.asm,,$(subst build-ml/,,$@))) $(INCS) $(SDEFS) -MD -o $@ $<
+
+build-ml/%/libc.a: $(foreach s,$(SUBDIRS),build-ml/%//$(s)/out.a)
+	@echo "MAKE-LIBS: $@	$^"
+	mkdir -p $(dir $@)
 	( \
-		echo CREATE $(LIBC).tmp; \
+		echo CREATE $@.tmp; \
 		for s in $^; \
 			do echo ADDLIB "$$s"; done; \
-		echo SAVE \
+			echo SAVE \
 	) | $(AR) -M
-	mv $(LIBC).tmp $(LIBC)
+	mv $@.tmp $@
 
-$(CRT0): crt0.S
+get = $(word $(1),$(subst //, ,$(subst build-ml/,,$@)))
+get_multi = $(call get,1)
+get_lib = $(word 1,$(subst /, ,$(call get,2)))
 
-$(SUBLIBSINMULTILIB) : $(TOPDIR)/libc/build-ml/$(MULTISUBDIR)/%/out.a: %
-	mkdir -p $(@D)
-	$(MAKE) -C $(@D) VPATH=$(abspath $<) -f $(abspath $<)/Makefile all
-# Use .PHONY to force recursive `make' in all subdirectories for each multilib
-.PHONY: $(SUBLIBSINMULTILIB)
+build-ml/%/out.a: FORCE
+	@echo 'BUILD	$@	$(call get_multi)'
+	mkdir -p $(dir $@)
+	make \
+		-C $(dir $@) \
+		-f $(abspath $(get_lib))/Makefile \
+		all \
+		SRCDIR=$(abspath $(get_lib)) \
+		VPATH=$(abspath $(get_lib)) \
+		MULTISUBDIR='$(call get_multi)' \
+		MULTILIB='$(call get_param,$(call get_multi))'
 
-$(SUBDIRS):
-
-# Install one particular multilib variant of libc.a, crt0.o, and include files.
-# TODO: tidy up the include file installation?
-ifneq "" "$(DESTDIR)"
-INSTALL_DATA = install -c -m 644
-MULTIINCDIR = $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/include
-.PHONY: install
-install: $(LIBC) uninstall
-	mkdir -p $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR) \
-		 $(MULTIINCDIR)/asm $(MULTIINCDIR)/sys \
-		 $(MULTIINCDIR)/arch $(MULTIINCDIR)/arpa \
-		 $(MULTIINCDIR)/netinet $(MULTIINCDIR)/linuxmt
-ifeq "" "$(filter -mcmodel=medium,$(MULTILIB))"
-	$(INSTALL_DATA) $(LIBC) $(CRT0) \
-	    $(TOPDIR)/elks/elks-small.ld $(TOPDIR)/elks/elks-tiny.ld \
-	    $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)
-else
-	$(INSTALL_DATA) $(LIBC) $(CRT0) $(TOPDIR)/elks/elks-medium.ld \
-	    $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)
-endif
-	$(INSTALL_DATA) include/*.h $(TOPDIR)/include/autoconf.h $(MULTIINCDIR)
-	$(INSTALL_DATA) include/asm/*.h $(MULTIINCDIR)/asm
-	$(INSTALL_DATA) include/sys/*.h $(MULTIINCDIR)/sys
-	$(INSTALL_DATA) include/arpa/*.h $(MULTIINCDIR)/arpa
-	$(INSTALL_DATA) include/netinet/*.h $(MULTIINCDIR)/netinet
-	$(INSTALL_DATA) $(TOPDIR)/elks/include/arch/*.h $(MULTIINCDIR)/arch
-	$(INSTALL_DATA) $(TOPDIR)/elks/include/linuxmt/*.h \
-	    $(MULTIINCDIR)/linuxmt
-uninstall:
-	$(RM) $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/$(notdir $(LIBC)) \
-	      $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/$(notdir $(CRT0)) \
-	      $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/elks-medium.ld \
-	      $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/elks-small.ld \
-	      $(DESTDIR)/ia16-elf/lib/$(MULTISUBDIR)/elks-tiny.ld \
-	      $(MULTIINCDIR)/autoconf.h \
-	      $(patsubst include/%,$(MULTIINCDIR)/%,$(wildcard include/*.h))
-	# Assume that all <asm/*>, <sys/*>, <arpa/*>, <netinet/*>, <arch/*>,
-	# & <linuxmt/*> header files were installed from here (elks-libc) &
-	# not from elsewhere.
-	#
-	# This also allows us to clean away obsolete internal header files
-	# such as <linuxmt/arpa/inet.h> --- see discussion at
-	# https://github.com/jbruchon/elks/pull/713 .
-	#
-	# This code will need to be adjusted if the assumption is ever broken.
-	#	-- tkchia 20200818
-	$(RM) -r $(MULTIINCDIR)/asm $(MULTIINCDIR)/sys $(MULTIINCDIR)/arpa \
-		 $(MULTIINCDIR)/netinet $(MULTIINCDIR)/arch \
-		 $(MULTIINCDIR)/linuxmt
-endif
-
-else
-
-# $(MULTISUBDIR) is undefined.  Build all multilibs that we can build; then
-# copy the library files for "default" settings into this directory.
-.PHONY: all
-
-all:
-	set -e \
-	$(foreach ml,$(BUILDMULTIS), ; \
-		export MULTISUBDIR='$(firstword $(subst ;, ,$(ml)))'; \
-		export MULTILIB='$(strip $(subst @, -, \
-		    $(lastword $(subst ;, ,$(ml)))))'; \
-		$(MAKE) all)
-
-ifneq "" "$(DESTDIR)"
-.PHONY: install uninstall
-# Besides installing library files and header files, also install the system
-# call tables call_tab.v and defn_tab.v in a reasonable place.  The elksemu
-# build process needs these.
-install uninstall:
-	set -e \
-	$(foreach ml,$(BUILDMULTIS), ; \
-		export MULTISUBDIR='$(firstword $(subst ;, ,$(ml)))'; \
-		export MULTILIB='$(strip $(subst @, -, \
-		    $(lastword $(subst ;, ,$(ml)))))'; \
-		$(MAKE) $@)
-	set -e; \
-	dest1=$(DESTDIR)/share/misc/elks; \
-	dest2=$(DESTDIR)/ia16-elf/lib/rt-specs; \
-	case $@ in \
-	    install) \
-		mkdir -p "$$dest1" "$$dest2"; \
-		cp build-ml/$(MAINMULTISUBDIR)/system/call_tab.v \
-		   build-ml/$(MAINMULTISUBDIR)/system/defn_tab.v "$$dest1"; \
-		cp $(TOPDIR)/elks/r-elks.spec "$$dest2";; \
-	    *) \
-		$(RM) "$$dest1"/call_tab.v "$$dest1"/defn_tab.v \
-		      "$$dest2"/r-elks.spec; \
-		rmdir -p "$$dest1" "$$dest2" || true;; \
-	esac
-endif
-
-endif
-
-.PHONY: clean
-
-CLEANS	= $(addprefix clean-,$(SUBDIRS))
-
-clean: $(CLEANS)
-	$(RM) -r build-ml *.o libc.a
-
-.PHONY: $(CLEANS)
-$(CLEANS):
-	@echo "CLEAN	$@"
-	$(MAKE) -C $(subst clean-,,$@) clean
+.PHONY: FORCE
+FORCE:

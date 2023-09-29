@@ -22,5 +22,6 @@ out.a: $(OBJS)
 	$(RM) $@
 	$(AR) $(ARFLAGS_SUB) $@ $^
 
+.PHONY: clean
 clean:
 	$(RM) *.[aod]
