@@ -22,7 +22,7 @@ function print_syscall(file, p3, p4)
 
 BEGIN {
 	if (file_mk != "")
-		print "OBJS += \\" > file_mk;
+		print "SYSCALL_OBJS += \\" > file_mk;
 }
 
 /^[	 ]*#/ { next; }
@@ -64,7 +64,7 @@ BEGIN {
 	}
 
 	if (file_mk != "")
-		printf "\tsyscall/%s.o \\\n", funcname > file_mk;
+		printf " %s.o \\\n", funcname > file_mk;
 }
 END {
 	if (defn_tab != "")

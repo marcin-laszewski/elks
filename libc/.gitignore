@@ -1,3 +1,8 @@
 crt0.o
 libc.a
 build-ml/
+asm.mk
+h.mk
+libc.mk
+o.mk
+syscall.mk
