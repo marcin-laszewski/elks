@@ -1,1 +1,3 @@
-src/
+elf2elks
+srcs.mk
+elftoolchain-*

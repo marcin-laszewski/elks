@@ -1,57 +1,112 @@
 # Convert ELF output file from gold linker to ELKS a.out
-# Requires libelf to be installed
+# Requires libelf sources of 'elftoolchain' (tar, bz2, gz, xz)
+#
+# Usage: $ make info
 #
 #########################################################################
-#
-# Note! Dependencies are done automagically by 'make dep', which also
-# removes any old dependencies. DON'T put your own dependencies here
-# unless it's something special (ie not a .c file).
-#
+# Note! Dependencies are not done automagically.
 #########################################################################
 # Relative path to base directory.
 
-TARBALL		= elftoolchain-0.7.1.tar.bz2
-LIBELF 		= src/libelf/libelf.a
-OBJS		= elf2elks.o
-OUT		= ../bin/elf2elks
+DEFAULT_TARBALL	= elftoolchain-0.7.1.tar.bz2
+DEFAULT_INSTDIR	= ../bin
 
-CFLAGS_ADD	= -Isrc/libelf -Isrc/common
+TARBALL	?= $(DEFAULT_TARBALL)
+NAME	= $(subst .xz,,$(subst .tar,,$(subst .gz,,$(subst .bz2,,$(TARBALL)))))
+SRC	= $(NAME)
+INSTDIR	?= $(DEFAULT_INSTDIR)
+OUT	= elf2elks
+PATCH_1	= elftoolchain.patch
+INCS	= $(SRC)/libelf $(SRC)/common
 
-all: $(OUT)
-
-$(OUT): $(OBJS) $(LIBELF)
-	$(CC) -o $@ $^
-
-elf2elks.o: elf2elks.c $(LIBELF)
-	$(CC) -c -o $@ $(CFLAGE) $(CFLAGS_ADD) $<
-
-# libelf has its own makefile for building, but the makefile requires BSD
-# make.  To avoid roping in BSD make as yet another dependency, we directly
-# run the commands to generate and compile the libelf sources here.  This
-# still requires m4 as a dependency though.
-$(LIBELF): $(TARBALL) elftoolchain.patch
-	$(RM) -r src
-	mkdir src
-	tar xjf $(TARBALL) -C src --strip-components=1
-	cd src && patch -p1 < ../elftoolchain.patch
-ifeq "Linux" "$(shell uname -s)"
-	cd src/common && ./native-elf-format > native-elf-format.h
+ifndef V
+	V = @
 endif
-	cd src/libelf \
-	&& m4 -DSRCDIR=. libelf_convert.m4 > libelf_convert.c \
-	&& m4 -DSRCDIR=. libelf_fsize.m4 > libelf_fsize.c \
-	&& m4 -DSRCDIR=. libelf_msize.m4 > libelf_msize.c \
-	&& for src in *.c; \
-		do \
-			$(CC) $(CFLAGS) $(CFLAGS_ADD) -c -I. -I../common "$$src"; \
-		done \
-	&& $(RM) libelf.a \
-	&& $(AR) r libelf.a *.o
+
+CFLAGS	+= $(addprefix -I,$(INCS))
+#CFLAGS	+= -g
+CFLAGS	+= -O
+
+M4S = \
+ $(SRC)/libelf/libelf_convert.m4 \
+ $(SRC)/libelf/libelf_fsize.m4 \
+ $(SRC)/libelf/libelf_msize.m4 \
+
+OBJS = \
+ elf2elks.o \
+ $(subst .c,.o,$(SRCS)) \
+ $(subst .m4,.o,$(M4S)) \
+
+include srcs.mk
+
+.PHONE: all
+all: $(INSTDIR)/$(OUT)
+
+$(INSTDIR)/$(OUT): $(OUT)
+	@echo 'STRIP	$@'
+	$(V)strip -o $@ $<
+
+$(OUT): $(OBJS)
+	@echo 'LD	$@'
+	$(V)$(CC) $(LDFLAGS) -o $@ $^
+
+$(OBJS): $(SRC)/common/native-elf-format.h
+
+$(SRC)/common/native-elf-format.h: $(SRC)/.patched
+	@echo 'CREATE	$@'
+	$(V)if ! (cd $(dir $@) && ./native-elf-format) > $@; \
+	then \
+		$(RM) $@; \
+		false; \
+	fi
+
+$(SRC)/.patched: $(PATCH_1) $(addsuffix /.h,$(INCS)) $(SRCS)
+	@echo 'PATCH	$<'
+	$(V)patch -d $(dir $@) -p1 < $<
+	$(V)touch $@
+
+$(SRC)/%/.h: $(TARBALL)
+	@echo 'UNTAR-H	$(dir $@)'
+	$(V)tar xf $(TARBALL) $(dir $@)
+	$(V)touch $@
+
+$(SRCS) $(M4S) &: $(TARBALL)
+	@echo 'UNTAR-C	$<'
+	$(V)tar xf $< $(SRCS)
+	$(V)touch $(SRCS) $(M4S)
+
+%.o: %.c
+	@echo 'CC	$@'
+	$(V)$(CC) -c $(CFLAGS) -o $@ $<
+
+%.c: %.m4
+	@echo 'M4-C	$@'
+	$(V)m4 -DSRCDIR=$(dir $<) $< > $@
+
+.PHONY: info
+info:
+	@echo '$(MAKE) [-j<n>] [V=] [TARBALL=...] [INSTDIR=...] [ | all | clean | distclean ]' 1>&2
+	@echo '-j<n>		<n> parallel tasks. For example: -j`nproc`'
+	@echo 'V=		Print executed command.'
+	@echo 'TARBALL:	Default: $(DEFAULT_TARBALL)'
+	@echo 'INSTDIR:	Default: $(DEFAULT_INSTDIR)'
+	@echo 'Default target:	all'
+	@echo 'all:		Build "$(OUT)".'
+	@echo 'clean:		Remove created object files.'
+	@echo 'distclean:	Remove all created files, but "$(INSTDIR)/$(OUT)".'
+
+srcs.mk: $(TARBALL)
+	@echo 'SRCS	$<'
+	$(V)tar tf $< --wildcards '$(NAME)/libelf/*.c' \
+	| awk 'BEGIN { print "SRCS = \\"; } { printf " %s \\\n", $$1; }' \
+	> $@
 
 .PHONY: distclean
 distclean: clean
-	find . -name '*~' | xargs $(RM) $(OUT)
+	@echo 'DISTCLEAN $(OUT) $(SRC)'
+	$(V)find . -name '*~' | xargs $(RM) -r $(OUT) $(SRC)
 
 .PHONY: clean
 clean:
-	$(RM) -r $(OBJS) $(LIBELF) src/
+	@echo 'CLEAN'
+	$(V)$(RM) $(OBJS) $(SRC)/common/native-elf-format.h $(subst .m4,.c,$(M4S)) srcs.mk
