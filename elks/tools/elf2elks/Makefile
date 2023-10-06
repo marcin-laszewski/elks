@@ -52,7 +52,7 @@ $(OUT): $(OBJS)
 
 $(OBJS): $(SRC)/common/native-elf-format.h
 
-$(SRC)/common/native-elf-format.h: $(SRC)/.patched
+$(SRC)/common/native-elf-format.h: $(SRC)/.$(PATCH_1)
 	@echo 'CREATE	$@'
 	$(V)if ! (cd $(dir $@) && ./native-elf-format) > $@; \
 	then \
@@ -60,7 +60,7 @@ $(SRC)/common/native-elf-format.h: $(SRC)/.patched
 		false; \
 	fi
 
-$(SRC)/.patched: $(PATCH_1) $(addsuffix /.h,$(INCS)) $(SRCS)
+$(SRC)/.$(PATCH_1): $(PATCH_1) $(addsuffix /.h,$(INCS)) $(SRCS)
 	@echo 'PATCH	$<'
 	$(V)patch -d $(dir $@) -p1 < $<
 	$(V)touch $@
