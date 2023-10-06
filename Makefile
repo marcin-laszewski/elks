@@ -30,14 +30,8 @@ boot: .config include/autoconf.h
 	$(MAKE) -C bootblocks all
 
 .PHONY: elkscmd
-elkscmd: .config include/autoconf.h libc-install tools-elf2elks \
- $(LIB86) \
- bootblocks/mbr_autogen.c
+elkscmd: .config include/autoconf.h libc-install $(LIB86)
 	$(MAKE) -C elkscmd all
-
-.PHONY: bootblocks/mbr_autogen.c
-bootblocks/mbr_autogen.c:
-	$(MAKE) -C $(dir $@) $(notdir $@)
 
 .PHONY: tools-elf2elks
 tools-elf2elks:

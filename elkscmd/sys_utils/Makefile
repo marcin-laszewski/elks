@@ -111,6 +111,11 @@ console: console.o
 makeboot: makeboot.o $(TINYPRINTF)
 	$(LD) $(LDFLAGS) -o makeboot makeboot.o $(TINYPRINTF) $(LDLIBS)
 
+makeboot.o: ../../bootblocks/mbr_autogen.c
+
+../../bootblocks/mbr_autogen.c:
+	$(MAKE) -C $(dir $@) $(notdir $@)
+
 unreal.o: $(ELKS_LIB)/unreal.S
 	$(LD) -melks-libc -mcmodel=small -c $(ELKS_LIB)/unreal.S -o unreal.o
 
