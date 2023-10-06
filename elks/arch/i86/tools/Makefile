@@ -2,6 +2,10 @@ BASEDIR 	= ../../..
 
 include	../$(BASEDIR)/.config
 
+ifndef V
+	V = @
+endif
+
 OUTS	= build mkbootloader
 ifeq ($(CONFIG_ARCH_SIBO), y)
 OUTS	+= wrt_disk.img imgconv
@@ -23,6 +27,10 @@ all: $(OUTS)
 clean:
 	$(RM) $(OUTS)
 
+imgconv: imgconv.c
+	@echo 'CC	$@'
+	$(V)cc -o imgconv imgconv.c
+
 wrt_disk.o: wrt_disk.c
 
 wrt_disk.tmp: wrt_disk.o file.o
@@ -36,3 +44,10 @@ wrt_disk.tmp: wrt_disk.o file.o
 
 wrt_disk.img: wrt_disk.tmp imgconv
 	./imgconv wrt_disk.tmp wrt_disk.img
+
+build: build.c
+mkbootloader: mkbootloader.c
+
+%: %.c
+	@echo 'CC	$@'
+	$(V)$(CC) $(CFLAGS) -o $@ $<
