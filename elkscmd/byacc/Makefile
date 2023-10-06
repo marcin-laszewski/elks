@@ -43,16 +43,22 @@ PROGRAM	      = yacc
 
 SRCS = $(subst .o,.c,$(OBJS)
 
+.PHONY: all
 all:		$(PROGRAM)
 
 $(PROGRAM):	$(OBJS) $(LIBS)
-	$(LINKER) $(LDFLAGS) -o $(PROGRAM) $(OBJS) $(LIBS)
+	@echo 'LD	$@'
+	$(V)$(LINKER) $(LDFLAGS) -o $(PROGRAM) $(OBJS) $(LIBS)
 
+.PHONY: install
 install: $(PROGRAM)
-	$(INSTALL) $(PROGRAM) $(DESTDIR)/bin
+	@echo 'INSTALL	$^'
+	$(V)$(INSTALL) $(PROGRAM) $(DESTDIR)/bin
 
+.PHONY: clean
 clean:
-	$(RM) $(OBJS) $(PROGRAM) core
+	@echo 'CLEAN'
+	$(V)$(RM) $(OBJS) $(PROGRAM) core
 
 #depend:;	@mkmf -f $(MAKEFILE) PROGRAM=$(PROGRAM) DEST=$(DEST)
 #
