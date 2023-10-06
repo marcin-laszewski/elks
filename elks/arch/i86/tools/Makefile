@@ -7,7 +7,8 @@ ifeq ($(CONFIG_ARCH_SIBO), y)
 OUTS	+= wrt_disk.img imgconv
 endif
 
-CFLAGS	+= -I$(BASEDIR)/include/ -I$(BASEDIR)/../include/
+override CC = cc
+override CFLAGS = -I$(BASEDIR)/include/ -I$(BASEDIR)/../include/
 
 # SIBO paramters.
 STACK_SIZE	= 64		# paragraphs of 16 bytes
