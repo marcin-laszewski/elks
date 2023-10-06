@@ -556,7 +556,7 @@ create_symtab (void)
 
     if (!symfile) {
         strcpy(symtab_filename, "symXXXXXX");
-        mktemp(symtab_filename);
+        mkstemp(symtab_filename);
     }
     outfp = fopen(symtab_filename, "w");
     if (!outfp)
