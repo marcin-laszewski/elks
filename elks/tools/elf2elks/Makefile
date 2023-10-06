@@ -23,9 +23,9 @@ ifndef V
 	V = @
 endif
 
-CFLAGS	+= $(addprefix -I,$(INCS))
-#CFLAGS	+= -g
-CFLAGS	+= -O
+override CFLAGS	+= $(addprefix -I,$(INCS))
+#override CFLAGS	+= -g
+override CFLAGS	+= -O
 
 M4S = \
  $(SRC)/libelf/libelf_convert.m4 \
