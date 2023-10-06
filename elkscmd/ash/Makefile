@@ -60,13 +60,13 @@ parser.o: token.def
 token.def: mktokens
 	sh $<
 
-builtins.c builtins.h: shell.h builtins.table
+builtins.c builtins.h &: shell.h builtins.table
 	sh mkbuiltins $^
 
 init.o: mkinit $(SRCS)
 	./mkinit '$(CC) -c $(CFLAGS) init.c' $(SRCS)
 
-nodes.c nodes.h: mknodes nodetypes nodes.c.pat
+nodes.c nodes.h &: mknodes nodetypes nodes.c.pat
 	./mknodes nodetypes nodes.c.pat
 
 #signames.c signames.h: mksignames
@@ -75,13 +75,13 @@ nodes.c nodes.h: mknodes nodetypes nodes.c.pat
 #mksignames: mksignames.c
 #	gcc -O2 -o $@ $^
 
-syntax.c syntax.h: mksyntax
+syntax.c syntax.h &: mksyntax
 	./$<
 
 %: %.c
 	gcc -O2 -o $@ $^
 
-bltin/operators.c bltin/operators.h: bltin/mkexpr bltin/binary_op bltin/unary_op
+bltin/operators.c bltin/operators.h &: bltin/mkexpr bltin/binary_op bltin/unary_op
 	cd $(dir $@) && sh $(notdir $<)
 
 bltin/%.o:	bltin/%.c
