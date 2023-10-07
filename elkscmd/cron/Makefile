@@ -16,29 +16,40 @@ include $(BASEDIR)/Make.rules
 
 ###############################################################################
 
-progs=cron crontab
+INSTALL_DIR	= $(DESTDIR)/bin
 
 common=readcrontab.o lib.o
 
-all: $(progs)
+CRON_OUT	= cron
+CRON_OBJS	= cron.o runjob.o $(common)
 
-cron: cron.o runjob.o $(common)
-	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
+CRONTAB_OUT	= crontab
+CRONTAB_OBJS	= crontab.o $(common)
 
-crontab: crontab.o $(common)
-	$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
+PROGS		= $(CRON_OUT) $(CRONTAB_OUT)
+
+.PHONY: all
+all: $(PROGS)
+
+$(CRON_OUT): $(CRON_OBJS)
+$(CRONTAB_OUT): $(CRONTAB_OBJS)
+
+$(PROGS):
+	@echo 'CC-LD	$@'
+	$(V)$(CC) $(CFLAGS) -maout-heap=14336 -o $@ $^
 
 .PHONY: clean
 clean:
-	$(RM) $(progs) *.o
+	@echo 'CLEAN'
+	$(V)$(RM) $(PROGS) $(CRON_OBJS) $(CRONTAB_OBJS)
 
 .PHONY: install
-install: \
- $(DESTDIR)/bin/cron \
- $(DESTDIR)/bin/crontab \
+install: $(addprefix $(INSTALL_DIR)/,$(PROGS))
 
-$(DESTDIR)/bin/%: %
-	$(INSTALL) $< $@
+$(INSTALL_DIR)/%: %
+	@echo 'INSTALL	$@'
+	$(V)mkdir -p $(dir $@)
+	$(V)$(INSTALL) $< $@
 
 cron.o: cron.c cron.h config.h
 crontab.o: crontab.c cron.h config.h
