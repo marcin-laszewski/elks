@@ -14,34 +14,26 @@ PRGS = ramdisk mkfs mkfat fsck partype fdisk df
 
 SPRGS=mkfs
 
+.PHONY: all
 all: $(PRGS)
 
+.PHONY: install_sibo
 install_sibo: all
 	$(INSTALL) $(SPRGS) $(DESTDIR)/bin
 
-install: all
-	$(INSTALL) $(PRGS) $(DESTDIR)/bin
+.PHONY: install
+install: $(PRGS)
+	$(V)$(INSTALL) $^ $(DESTDIR)/bin
 
-df: df.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o df df.o $(TINYPRINTF) $(LDLIBS)
+fsck: LDFLAGS += -maout-heap=0xffff
 
-fsck: fsck.o
-	$(LD) $(LDFLAGS) -o fsck -maout-heap=0xffff fsck.o $(LDLIBS)
+df mkfs mkfat: OBJS += $(TINYPRINTF)
 
-fdisk: fdisk.o
-	$(LD) $(LDFLAGS) -o fdisk fdisk.o $(LDLIBS)
+%: %.c
+	@echo 'CC-LD	$@'
+	$(V)$(LD) $(LDFLAGS) -o $@ $< $(OBJS) $(LDLIBS)
 
-mkfs: mkfs.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o mkfs mkfs.o $(TINYPRINTF) $(LDLIBS)
-
-mkfat: mkfat.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o mkfat mkfat.o $(TINYPRINTF) $(LDLIBS)
-
-partype: partype.o
-	$(LD) $(LDFLAGS) -o partype partype.o $(LDLIBS)
-
-ramdisk: ramdisk.o
-	$(LD) $(LDFLAGS) -o ramdisk ramdisk.o $(LDLIBS)
-
+.PHONY: clean
 clean:
-	$(RM) *.o $(FORMATMOD) core $(PRGS)
+	@echo 'CLEAN'
+	$(V)$(RM) $(FORMATMOD) core $(PRGS)
