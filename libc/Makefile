@@ -692,7 +692,7 @@ $(IA16_LIBDIR)/%/include/autoconf.h: ../include/autoconf.h
 	mkdir -p $(dir $@)
 	cp $< $@
 
-   $(TARGETS_INSTALL): install-%: $(addprefix $(IA16_LIBDIR)/%/,$(INCS_H))
+$(TARGETS_INSTALL): install-%: $(addprefix $(IA16_LIBDIR)/%/,$(INCS_H))
 #	@echo 'CHECK-H	$@'
 #	@for f in $^; \
 #	do \
