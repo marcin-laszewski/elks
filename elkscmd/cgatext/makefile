@@ -14,17 +14,24 @@ CFLAGS	+= -I$(ELKS)/elks/include/arch
 OBJS	+= main.o
 LIBS	= $(ELKS_LIB86)/lib86.a
 
+.PHONY: all
 all: $(OUT)
 
 $(OUT):	$(OBJS) $(LIBS)
-	echo '[LD]	$@'
-	$(LD) $(LDFLAGS) -o $@ $^
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) -o $@ $^
 
+.PHONY: distclean
 distclean: clean
-	$(RM) *~ $(OUT)
+	@echo 'DISTCLEAN'
+	$(V)$(RM) *~ $(OUT)
 
-clean::
-	$(RM) $(OBJS)
+.PHONY: clean
+clean:
+	@echo 'CLEAN'
+	$(V)$(RM) $(OBJS)
 
+.PHONY: install
 install: $(OUT)
-	cp $(OUT) $(DESTDIR)/bin
+	@echo 'INSTALL $(DESTDIR)/bin/$(notdir $<)'
+	$(V)cp $(OUT) $(DESTDIR)/bin
