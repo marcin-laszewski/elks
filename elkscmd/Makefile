@@ -83,9 +83,14 @@ install:
 	@echo 'INSTALL'
 	$(V)$(MAKE) -f Make.install "CONFIG=$(TOPDIR)/.config"
 
+CLEANS	= $(addprefix clean-,$(SUBDIRS) $(PROGS))
+
 .PHONY: clean
-clean:
-	@echo 'CLEAN'
-	$(V)for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
+clean: $(CLEANS)
+
+.PHONY: $(CLEANS)
+$(CLEANS):
+	@echo 'CLEAN	$@'
+	$(MAKE) -C $(subst clean-,,$@) clean V=$(V)
 
 ###############################################################################
