@@ -591,9 +591,11 @@ info:
 
 %.v: $(SYSCALLDAT) system/syscall.awk
 	@echo 'TAB	$@'
+	$(V)mkdir -p $@
 	$(V)awk -f system/syscall.awk -v $(basename $(notdir $@))=$@ $<
 
 system/syscall.mk: $(SYSCALLDAT) system/syscall.awk
+	$(V)mkdir -p $@
 	awk -f system/syscall.awk -v file_mk=$@ $<
 
 include syscall.mk
