@@ -705,6 +705,7 @@ $(TARGETS_INSTALL): install-%: $(addprefix $(IA16_LIBDIR)/%/,$(INCS_H))
 include h.mk
 
 h.mk: Makefile
+	@echo 'MK	$@'
 	@if ! for r in $(TARGETS_NAME); \
 		do \
 			echo "$(IA16_LIBDIR)/$$r/%.h: %.h"; \
