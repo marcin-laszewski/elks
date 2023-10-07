@@ -62,7 +62,7 @@ include $(BASEDIR)/Make.rules
 all: $(SUBDIRS) $(PROGS)
 
 $(TOPDIR)/include/autoconf.h:
-	@if ! test -e $@; \
+	$(V)@if ! test -e $@; \
 	then \
 		echo "You must configure ELKS first: $@" >&2; \
 		false; \
@@ -70,18 +70,22 @@ $(TOPDIR)/include/autoconf.h:
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS): $(TOPDIR)/include/autoconf.h
-	$(MAKE) -C $@ all
+	@echo 'MAKE-DIR	$@'
+	$(V)$(MAKE) -C $@ all
 
 .PHONY: $(PROGS)
 $(PROGS): $(TOPDIR)/include/autoconf.h
-	$(MAKE) -C $@
+	@echo 'MAKE-PRG	$@'
+	$(V)$(MAKE) -C $@
 
 .PHONY: install
 install:
-	$(MAKE) -f Make.install "CONFIG=$(TOPDIR)/.config"
+	@echo 'INSTALL'
+	$(V)$(MAKE) -f Make.install "CONFIG=$(TOPDIR)/.config"
 
 .PHONY: clean
 clean:
-	for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
+	@echo 'CLEAN'
+	$(V)for DIR in $(SUBDIRS); do $(MAKE) -C $$DIR clean || exit 1; done
 
 ###############################################################################
