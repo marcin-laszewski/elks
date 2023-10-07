@@ -22,11 +22,28 @@ SUBDIRS = \
 	ftp \
     # EOL
 
-all:
-	for i in $(SUBDIRS); do $(MAKE) -C $$i all || exit 1 ; done
+CLEANS		= $(addprefix clean-,$(SUBDIRS))
+INSTALLS	= $(addprefix install-,$(SUBDIRS))
 
-install:
-	for i in $(SUBDIRS); do $(MAKE) -C $$i install || exit 1; done
+all: $(SUBDIRS)
 
-clean:
-	for i in $(SUBDIRS); do $(MAKE) -C $$i clean || exit 1; done
+.PHONY: $(SUBDIRS)
+$(SUBDIRS):
+	@echo 'BUILD	$@'
+	$(V)$(MAKE) -C $@ all
+
+.PHONY: install
+install: $(INSTALLS)
+
+.PHONY: $(INSTALLS)
+$(INSTALLS):
+	@echo 'subst install-,INSTALL	,$@)'
+	$(V)$(MAKE) -C $(subst install-,,$@)) install
+
+.PHONY: clean
+clean: $(CLEANS)
+
+.PHONY: $(CLEANS)
+$(CLEANS):
+	@echo '$(subst clean-,CLEAN	,$@)'
+	$(V)make -C $(subst clean-,,$@) clean
