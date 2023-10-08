@@ -14,20 +14,28 @@ PRGS=netstat nslookup arp
 
 LOCALFLAGS=-I$(ELKSCMD_DIR)
 
+.PHONY: all
 all: $(PRGS)
 
-install: $(PRGS)
-	$(INSTALL) $(PRGS) $(DESTDIR)/bin
-#	$(INSTALL) resolv.cfg $(DESTDIR)/etc
+.PHONY: install
+install: $(addprefix $(DESTDIR)/bin/,$(PRGS))
+#install: $(DESTDIR)/etc/resolv.cfg
 
-netstat: netstat.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) netstat.o $(TINYPRINTF) -o netstat $(LDLIBS)
+$(DESTDIR)/bin/%: %
+	@echo 'INSTALL	$@'
+	$(V)$(INSTALL) -d $(dir $@)
+	$(V)$(INSTALL) $< $@
 
-nslookup: nslookup.o
-	$(LD) $(LDFLAGS) nslookup.o -o nslookup $(LDLIBS)
+arp netstat: OBJS += $(TINYPRINTF)
 
-arp: arp.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) arp.o $(TINYPRINTF) -o arp $(LDLIBS)
+# Disable
+%: %.c
 
+%: %.o
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) $< $(OBJS) -o $@ $(LDLIBS)
+
+.PHONY: clean
 clean:
-	$(RM) core *.o $(PRGS)
+	@echo 'CLEAN'
+	$(V)$(RM) core $(PRGS)
