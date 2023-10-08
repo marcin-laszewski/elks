@@ -4,6 +4,8 @@ BASEDIR=../..
 
 include $(BASEDIR)/Make.defs
 
+INSTALL_DIR = $(DESTDIR)/bin
+
 ###############################################################################
 #
 # Include standard packaging commands.
@@ -12,21 +14,28 @@ include $(BASEDIR)/Make.rules
 
 ###############################################################################
 
-SRCS = ftpd.c ftp.c
 BINS = ftp ftpd
-OBJS = $(SRCS:.c=.o)
+INSTALLS = $(addprefix $(INSTALL_DIR)/,$(BINS))
 
 all:	$(BINS)
 
-ftp:	ftp.o
-	$(LD) $(LDFLAGS) -maout-stack=6144 -maout-heap=4096 -o ftp ftp.o $(LDLIBS)
+ftp:	LDFLAGS += -maout-stack=6144
+ftpd:	LDFLAGS += -maout-stack=4096
 
-ftpd:	ftpd.o
-	$(LD) $(LDFLAGS) -maout-stack=4096 -maout-heap=4096 -o ftpd ftpd.o $(LDLIBS)
+%: %.c
+	@echo 'CC-LD	$@'
+	$(V)$(LD) $(LDFLAGS) -maout-heap=4096 -o $@ $< $(LDLIBS)
 
-install: ftpd ftp
-	$(INSTALL) $(BINS)  $(DESTDIR)/bin
+.PHONY: install
+install: $(INSTALLS)
 
+$(INSTALL_DIR)/%: %
+	@echo 'INSTALL	$@'
+	$(V)mkdir -p $(dir $@)
+	$(V)$(INSTALL) $< $(dir $@)
+
+.PHONY: clean
 clean:
-	$(RM) $(BINS) $(OBJS)
+	@echo 'CLEAN'
+	$(V)$(RM) $(BINS)
 
