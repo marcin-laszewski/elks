@@ -12,39 +12,33 @@ include $(BASEDIR)/Make.rules
 
 ###############################################################################
 
+INSTALL	?= install
+INSTDIR	?= $(DESTDIR)/bin
+
 # TODO: lpd man mt install	# Do not compile.
 # compiling but unused: pwdauth
 PRGS=env lp remsync synctree tget
 
-env: env.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o env env.o $(TINYPRINTF) $(LDLIBS)
+env lp: OBJS += $(TINYPRINTF)
 
-pwdauth: pwdauth.o
-	$(LD) $(LDFLAGS) -o pwdauth pwdauth.o $(LDLIBS)
-
-lp: lp.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o lp lp.o $(TINYPRINTF) $(LDLIBS)
-
-man: man.o
-	$(LD) $(LDFLAGS) -o man man.o $(LDLIBS)
-
-remsync: remsync.o
-	$(LD) $(LDFLAGS) -o remsync remsync.o $(LDLIBS)
-
-synctree: synctree.o
-	$(LD) $(LDFLAGS) -o synctree synctree.o $(LDLIBS)
-
-tget: tget.o
-	$(LD) $(LDFLAGS) -o tget tget.o $(LDLIBS)
-
-
+.PHONY: all
 all: $(PRGS)
 
-lpd: lpd.o
-	$(LD) $(LDFLAGS) -o lpd lpd.o $(LDLIBS)
+%: %.c
 
-install: $(PRGS)
-	$(INSTALL) $(PRGS) $(DESTDIR)/bin
+%: %.o
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) -o $@ $< $(OBJS) $(LDLIBS)
 
+.PHONY: install
+install: $(addprefix $(INSTDIR)/,$(PRGS))
+
+$(INSTDIR)/%: %
+	@echo 'INSTALL	$@'
+	$(V)mkdir -p $(dir $@)
+	$(V)$(INSTALL) $< $@
+
+.PHONY: clean
 clean:
-	$(RM) core *.o $(PRGS)
+	@echo 'CLEAN'
+	$(V)$(RM) core *.o $(PRGS)
