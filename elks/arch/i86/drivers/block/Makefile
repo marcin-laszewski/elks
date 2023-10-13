@@ -33,6 +33,8 @@ include $(BASEDIR)/Makefile-rules
 #########################################################################
 # Objects to be compiled.
 
+LIB	= blk_drv.a
+
 OBJS  = init.o genhd.o ll_rw_blk.o
 
 # BIOS floppy and hard drive support
@@ -69,14 +71,22 @@ endif
 #########################################################################
 # Commands.
 
-all:	blk_drv.a
+.PHONY: all
+all:	$(LIB)
 
-blk_drv.a: $(OBJS)
-	$(AR) rcs blk_drv.a $(OBJS)
+$(LIB): $(OBJS)
+	@echo 'AR	$@'
+	$(V)$(AR) rcs $@ $^
+
+.PHONY: clean
+clean:
+	@echo 'CLEAN'
+	$(V)$(RM) $(LIB) $(OBJS)
 
 #########################################################################
 # Standard commands.
 
+.PHONY: distdir
 distdir:
 	cp -pf config.in Makefile $(DISTDIR)/arch/i86/drivers/block
 	cp -pf *.S *.h *.c $(DISTDIR)/arch/i86/drivers/block
