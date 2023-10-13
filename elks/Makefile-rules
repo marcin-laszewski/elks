@@ -113,6 +113,10 @@ CCDEFS = -D__KERNEL__
 #########################################################################
 # Set the target environment and the compiler to use.
 
+ifndef V
+	V = @
+endif
+
 ifeq ($(wildcard $(TOPDIR)/.config),)
     MK_ARCH	= ibmpc
     MK_CPU	= 8086
@@ -248,16 +252,19 @@ endif
 %.s: %.S ;
 
 %.o: %.S
-	$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.tmp $<
-	$(AS) $(ASFLAGS) -o $*.o $*.tmp
-	$(RM) $*.tmp
+	@echo 'CC-AS	$@'
+	$(V)$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.tmp $<
+	$(V)$(AS) $(ASFLAGS) -o $@ $*.tmp
+	$(V)$(RM) $*.tmp
 
 %.o: %.s
-	$(AS) $(ASFLAGS) -o $*.o $<
+	@echo 'AS	$@'
+	$(V)$(AS) $(ASFLAGS) -o $@ $<
 
 ifneq ($(USEBCC), N)
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $*.o $<
+	@echo 'CC	$@'
+	$(V)$(CC) $(CFLAGS) -c -o $@ $<
 endif
 
 #########################################################################
@@ -265,7 +272,9 @@ endif
 # allows `make elks` to be called from any directory in the tree, and
 # results in `make all` being called in the root directory of the tree.
 
+.PHONY: elks
 elks:
+	@echo 'MAKE	$(BASEDIR)'
 	${MAKE} -C $(BASEDIR) all
 
 #########################################################################
@@ -286,7 +295,8 @@ doclean: $(CLEANDEP) clean-files
 
 .PHONE: clean-files
 clean-files:
-	$(RM) -v *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
+	@echo 'CLEAN-FILES'
+	$(V)$(RM) -v *~ *.a *.bak *.lint *.map *.o *.tmp core $(CLEANME)
 
 dodep:	$(DEPEND)
 	@if \ls *.c > /dev/null 2>&1 ; then \
