@@ -42,14 +42,16 @@ OBJS  = sched.o printk.o sleepwake.o version.o sys.o sys2.o fork.o \
 #########################################################################
 # Commands:
 
+.PHONY: all
 all:	kernel.a
 
 kernel.a: $(OBJS)
-	$(AR) rcs kernel.a $(OBJS)
+	$(AR) rcs $@ $^
 
 #########################################################################
 # Standard commands.
 
+.PHONY: distdir
 distdir:
 	cp -pf Makefile *.c $(DISTDIR)/kernel
 
