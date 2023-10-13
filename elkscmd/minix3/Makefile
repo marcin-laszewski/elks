@@ -12,53 +12,42 @@ include $(BASEDIR)/Make.rules
 
 ###############################################################################
 
+INSTALL	?= install
+INSTDIR	= $(DESTDIR)/bin
+
 PRGS = file head sed sort tail tee cal diff find mail
 
 #
 # Rules
 #
 
-cal: cal.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o cal cal.o $(TINYPRINTF) $(LDLIBS)
+cal file: OBJS += $(TINYPRINTF)
 
-diff: diff.o
-	$(LD) $(LDFLAGS) -o diff diff.o $(LDLIBS)
-
-file: file.o $(TINYPRINTF)
-	$(LD) $(LDFLAGS) -o file file.o $(TINYPRINTF) $(LDLIBS)
-
-find: find.o
-	$(LD) $(LDFLAGS) -maout-heap=0x4000 -maout-stack=0x2000 -o find find.o $(LDLIBS)
-
-head: head.o
-	$(LD) $(LDFLAGS) -o head head.o $(LDLIBS)
-
-sed: sed.o
-	$(LD) $(LDFLAGS) -o sed sed.o $(LDLIBS)
+find: LDFLAGS += -maout-heap=0x4000 -maout-stack=0x2000
 
 # For ELKS, sort needs more data segment space than the kernel-given default.
 # Use gcc-ia16's -maout-chmem= option so that the a.out header will ask the
 # kernel for more non-static memory.
-sort: sort.o
-	$(LD) $(LDFLAGS) -maout-heap=0xb000 -o sort sort.o $(LDLIBS)
+sort: LDFLAGS += -maout-heap=0xb000
 
-tail: tail.o
-	$(LD) $(LDFLAGS) -o tail tail.o $(LDLIBS)
-
-tee: tee.o
-	$(LD) $(LDFLAGS) -o tee tee.o $(LDLIBS)
-
-mail: mail.o
-	$(LD) $(LDFLAGS) -o mail mail.o $(LDLIBS)
-
-
-include $(BASEDIR)/Make.rules
-
+.PHONY: all
 all: $(PRGS)
 
+%: %.c
 
-install: $(PRGS)
-	$(INSTALL) $(PRGS) $(DESTDIR)/bin
+%: %.o
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) -o $@ $^ $(OBJS) $(LDLIBS)
 
+.PHONY: install
+install: $(addprefix $(INSTDIR)/,$(PRGS))
+
+$(INSTDIR)/%: %
+	@echo 'INSTALL	$@'
+	$(V)$(INSTALL) -d $(dir $@)
+	$(V)$(INSTALL) $< $@
+
+.PHONY: clean
 clean:
-	$(RM) core *.o $(PRGS)
+	@echo 'CLEAN'
+	$(V)$(RM) core $(PRGS)
