@@ -78,14 +78,15 @@ boot/netbootsect: LDFLAGS += -M $(ARCH_LD) -s
 
 %: %.o
 	@echo 'LD	$@'
-	$(LD) $(LDFLAGS) -o $@ $< > $(basename $@).map
-	$(POSTLINK) $(POSTLINK_OPS) $@
+	$(V)$(LD) $(LDFLAGS) -o $@ $< > $(basename $@).map
+	$(V)$(POSTLINK) $(POSTLINK_OPS) $@
 
 boot/netbootsect.o:	boot/netbootsect.s
 
 .PHONY: toolkit
 toolkit:
-	${MAKE} -C tools all
+	@echo 'MAKE	$@'
+	$(V)${MAKE} -C tools all
 
 $(BASEDIR)/include/arch/asm-offsets.h: asm-offsets.s asm-offsets.awk
 	@echo 'CREAT-H	$@	$<'
@@ -101,14 +102,17 @@ asm-offsets.s: kernel/asm-offsets.c
 # Begin PC image build
 
 boot/system boot/system.sym &: boot/system.elf
-		cp $< $@
-		$(POSTLINK) --symfile $(basename $@).sym $@
+	@echo 'ELKS	$@'
+	$(V)cp $< $@
+	$(V)$(POSTLINK) --symfile $(basename $@).sym $@
 
 boot/system.map: boot/system.elf
-		$(NM) $< | sed -e '/&/d; /!/d' | sort > $@
+	@echo 'MAP-ELF	$@'
+	$(V)$(NM) $< | sed -e '/&/d; /!/d' | sort > $@
 
 boot/system.elf boot/system-full.map &: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
-	$(LD) -o $@ $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
+	@echo 'LD-MAP	$@'
+	$(V)$(LD) -o $@ $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
 		boot/crt0.o $(BASEDIR)/init/main.o \
 		'-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
 	> $(basename $@)-full.map
@@ -120,13 +124,15 @@ ifneq ($(CONFIG_ROMCODE), y)
 Image:	boot/Image
 
 boot/Image: toolkit boot/bootsect boot/setup boot/system
-	tools/build $(filter-out toolkit,$^) > $@
+	@echo 'IMAGE	$@'
+	$(V)tools/build $(filter-out toolkit,$^) > $@
 
 .PHONY: nbImage
 nbImage: boot/nbImage
 
 boot/nbImage: boot/netbootsect boot/Image
-	tools/mknbi-elks $^ $@
+	@echo 'IMAGE	$@'
+	$(V)tools/mknbi-elks $^ $@
 
 else
 
@@ -137,8 +143,9 @@ endif
 Image:	boot/Image
 
 boot/Image:	toolkit boot/setup boot/system
-	tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(CONFIG_ROM_CHECKSUM_SIZE) $@ $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
-	$(CONFIG_ROM_SIMULATOR_PROGRAM)
+	@echo 'IMAGE	$@'
+	$(V)tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(CONFIG_ROM_CHECKSUM_SIZE) $@ $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
+	$(V)$(CONFIG_ROM_SIMULATOR_PROGRAM)
 
 # End PC image build
 
@@ -149,15 +156,17 @@ endif
 
 .PHONY: boot-fd0
 boot-fd0: boot/Image
-	dd if=$< of=/dev/$(subst boot-,,$@) bs=8192
+	@echo 'IMAGE	$@'
+	$(V)dd if=$< of=/dev/$(subst boot-,,$@) bs=8192
 
 .PHONY: disk
 disk:	boot-fd0
 
 .PHONY: setup
 setup:	toolkit boot/setup  
-	tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(ROM_MAX_SETUP_SIZE) Image $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
-	$(CONFIG_ROM_SIMULATOR_PROGRAM)
+	@echo 'IMAGE	$@'
+	$(V)tools/mkbootloader $(RVECT) -c $(CONFIG_ROM_SETUP_CODE) $(ROM_MAX_SETUP_SIZE) Image $(CONFIG_ROM_BASE) -a boot/setup $(CONFIG_ROM_SETUP_CODE) -s boot/system $(CONFIG_ROM_KERNEL_CODE) $(CONFIG_ROM_BIOS_MODULE) $(CONFIG_ROM_BIOS_MODULE_ADDR)
+	$(V)$(CONFIG_ROM_SIMULATOR_PROGRAM)
 
 #########################################################################
 # library rules
@@ -173,7 +182,8 @@ KLIBS = \
 
 .PHONY: $(KLIBS)
 $(KLIBS):
-	$(MAKE) -C $(dir $@) $(notdir $@)
+	@echo 'MAKE	$@'
+	$(V)$(MAKE) -C $(dir $@) $(notdir $@)
 
 #########################################################################
 # commands.
