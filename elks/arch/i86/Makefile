@@ -100,18 +100,14 @@ asm-offsets.s: kernel/asm-offsets.c
 
 # Begin PC image build
 
-boot/system.sym: boot/system
-
-boot/system: boot/system.elf
+boot/system boot/system.sym &: boot/system.elf
 		cp $< $@
 		$(POSTLINK) --symfile $(basename $@).sym $@
 
 boot/system.map: boot/system.elf
 		$(NM) $< | sed -e '/&/d; /!/d' | sort > $@
 
-boot/system-full.map: boot/system.elf
-
-boot/system.elf: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
+boot/system.elf boot/system-full.map &: $(XINCLUDE) $(AARCHIVES) $(ADRIVERS) boot/crt0.o
 	$(LD) -o $@ $(CPU_LD) -M $(ARCH_LD) -T $(TOPDIR)/elks/elks-small.ld \
 		boot/crt0.o $(BASEDIR)/init/main.o \
 		'-(' $(ARCHIVES) $(DRIVERS) '-)' $(LIBGCC) \
