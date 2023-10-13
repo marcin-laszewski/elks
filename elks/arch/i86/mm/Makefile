@@ -36,18 +36,27 @@ include $(BASEDIR)/Makefile-rules
 # Objects to be compiled.
 
 OBJS  = malloc.o user.o memcpyfs.o xms.o
+LIB	= mm.a
 
 #########################################################################
 # Commands.
 
-all:	mm.a
+.PHONY: all
+all:	$(LIB)
 
-mm.a: $(OBJS)
-	$(AR) rcs mm.a $(OBJS)
+$(LIB): $(OBJS)
+	@echo 'AR	$@'
+	$(V)$(AR) rcs $@ $^
+
+.PHONY: clean
+clean:
+	@echo 'CLEAN'
+	$(V)$(RM) $(LIB) $(OBJS)
 
 #########################################################################
 # Standard commands.
 
+.PHONY: distdir
 distdir:
 	cp -pf Makefile *.c $(DISTDIR)/arch/i86/mm
 
