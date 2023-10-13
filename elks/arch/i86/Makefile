@@ -71,13 +71,15 @@ boot/bootsect:   boot/bootsect.o
 
 boot/setup:   boot/setup.o
 
-boot/bootsect boot/setup:
-	$(LD) $(LDFLAGS) -M -T $(TOPDIR)/elks/elks-tiny.ld -o $@ $< > $(basename $@).map
-	$(POSTLINK) --tiny $@
+boot/bootsect boot/setup: LDFLAGS += -M -T $(TOPDIR)/elks/elks-tiny.ld
+boot/bootsect boot/setup: POSTLINK_OPS += --tiny
 
-boot/netbootsect:	boot/netbootsect.o
-	$(LD) $(LDFLAGS) -M $(ARCH_LD) -s -o $@ $< > $(basename $@).map
-	$(POSTLINK) $@
+boot/netbootsect: LDFLAGS += -M $(ARCH_LD) -s
+
+%: %.o
+	@echo 'LD	$@'
+	$(LD) $(LDFLAGS) -o $@ $< > $(basename $@).map
+	$(POSTLINK) $(POSTLINK_OPS) $@
 
 boot/netbootsect.o:	boot/netbootsect.s
 
