@@ -41,4 +41,4 @@ $(INSTDIR)/%: %
 .PHONY: clean
 clean:
 	@echo 'CLEAN'
-	$(V)$(RM) core *.o $(PRGS)
+	$(V)$(RM) core $(PRGS)
