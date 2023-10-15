@@ -84,19 +84,8 @@ hd64-minix: hd64-minix.img
 
 hd64-minix.img: BLOCKS=65535
 
-hd%-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_2880K=y	> Config
-	echo CONFIG_IMG_HD=y		>> Config
-	echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
-	echo CONFIG_IMG_SECT=63		>> Config
-	echo CONFIG_IMG_HEAD=16		>> Config
-	echo CONFIG_IMG_CYL=127		>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
-	$(RM) Config
+hd32-minix.img hd64-minix.img: CYL=127
+hd32-minix.img hd64-minix.img: TYPE=MINIX
 
 .PHONY: fd360-fat
 fd360-fat: fd360-fat.img
@@ -133,18 +122,22 @@ fd%.img: $(TOPDIR)/.config Make.image
 .PHONY: fd2880-fat
 hd32-fat: hd32-fat.img
 
-hd32-fat.img: $(TOPDIR)/.config Make.image
+hd32-fat.img: BLOCKS=31752
+hd32-fat.img: CYL=63
+hd32-fat.img: TYPE=FAT
+
+hd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_2880K=y	> Config
 	echo CONFIG_IMG_HD=y		>> Config
-	echo CONFIG_IMG_BLOCKS=31752 >> Config
+	echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
 	echo CONFIG_IMG_SECT=63		>> Config
 	echo CONFIG_IMG_HEAD=16		>> Config
-	echo CONFIG_IMG_CYL=63		>> Config
-	echo CONFIG_IMG_FAT=y		>> Config
+	echo CONFIG_IMG_CYL=$(CYL)	>> Config
+	echo CONFIG_IMG_$(TYPE)=y	>> Config
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-fat
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
 	$(RM) Config
 
 # MBR images
