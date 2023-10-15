@@ -131,7 +131,7 @@ fd%.img: $(TOPDIR)/.config Make.image
 
 # FAT32 image
 .PHONY: fd2880-fat
-hd32-fat: hd32mbr-fat.img
+hd32-fat: hd32-fat.img
 
 hd32-fat.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_2880K=y	> Config
