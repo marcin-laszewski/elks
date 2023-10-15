@@ -81,27 +81,17 @@ fd%-minix.img: $(TOPDIR)/.config Make.image
 .PHONY: hd32-minix
 hd32-minix: hd32-minix.img
 
-hd32-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_2880K=y	> Config
-	echo CONFIG_IMG_HD=y		>> Config
-	echo CONFIG_IMG_BLOCKS=31752 >> Config
-	echo CONFIG_IMG_SECT=63		>> Config
-	echo CONFIG_IMG_HEAD=16		>> Config
-	echo CONFIG_IMG_CYL=63		>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-minix
-	$(RM) Config
+hd32-minix.img: BLOCKS=31752
 
 .PHONY: hd64-minix
 hd64-minix: hd64-minix.img
 
-hd64-minix.img: $(TOPDIR)/.config Make.image
+hd64-minix.img: BLOCKS=65535
+
+hd%-minix.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_2880K=y	> Config
 	echo CONFIG_IMG_HD=y		>> Config
-	echo CONFIG_IMG_BLOCKS=65535 >> Config
+	echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
 	echo CONFIG_IMG_SECT=63		>> Config
 	echo CONFIG_IMG_HEAD=16		>> Config
 	echo CONFIG_IMG_CYL=127		>> Config
@@ -109,7 +99,7 @@ hd64-minix.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd64-minix
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
 	$(RM) Config
 
 .PHONY: fd360-fat
