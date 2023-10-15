@@ -107,7 +107,9 @@ fd2880-minix:
 	$(RM) Config
 
 .PHONY: hd32-minix
-hd32-minix:
+hd32-minix: hd32-minix.img
+
+hd32-minix.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_2880K=y	> Config
 	echo CONFIG_IMG_HD=y		>> Config
 	echo CONFIG_IMG_BLOCKS=31752 >> Config
@@ -117,7 +119,7 @@ hd32-minix:
 	echo CONFIG_IMG_MINIX=y		>> Config
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
+	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-minix
 	$(RM) Config
 
@@ -194,7 +196,9 @@ fd2880-fat:
 
 # FAT32 image
 .PHONY: fd2880-fat
-hd32-fat:
+hd32-fat: hd32mbr-fat.img
+
+hd32-fat.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_2880K=y	> Config
 	echo CONFIG_IMG_HD=y		>> Config
 	echo CONFIG_IMG_BLOCKS=31752 >> Config
@@ -204,20 +208,26 @@ hd32-fat:
 	echo CONFIG_IMG_FAT=y		>> Config
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $(TOPDIR)/.config
+	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=hd32-fat
 	$(RM) Config
 
 # MBR images
 .PHONY: hd32mbr-minix
-hd32mbr-minix:
-	dd if=/dev/zero bs=512 count=63 | cat - hd32-minix.img > hd32mbr-minix.img
-	setboot hd32mbr-minix.img -P63,16,63 -Sm $(HD_MBR_BOOT)
+hd32mbr-minix: hd32mbr-minix.img
 
 .PHONY: hd32mbr-fat
-hd32mbr-fat:
-	dd if=/dev/zero bs=512 count=63 | cat - hd32-fat.img > hd32mbr-fat.img
-	setboot hd32mbr-fat.img -P63,16,63 -Sf $(HD_MBR_BOOT)
+hd32mbr-fat: hd32mbr-fat.img
+
+hd32mbr-minix.img: hd32-minix.img $(HD_MBR_BOOT)
+hd32mbr-minix.img: SETBOOT_OPS += -Sm
+
+hd32mbr-fat.img: hd32-fat.img $(HD_MBR_BOOT)
+hd32mbr-fat.img: SETBOOT_OPS += -Sf
+
+hd32mbr-minix.img hd32mbr-fat.img:
+	dd if=/dev/zero bs=512 count=63 | cat - $< > $@
+	setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT)
 
 # Clean target
 
