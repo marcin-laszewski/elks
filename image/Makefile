@@ -51,69 +51,31 @@ images-fat: fd360-fat fd720-fat fd1200-fat fd1440-fat fd2880-fat hd32-fat hd32mb
 .PHONY: images-hd
 images-hd: hd32-minix hd32mbr-minix hd64-minix
 
+fd_size	= $(subst fd,,$(firstword $(subst -, ,$@)))
+
 .PHONY: fd360-minix
 fd360-minix: fd360-minix.img
-
-fd360-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_360K=y		> Config
-	echo CONFIG_IMG_FD360=y		>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd360-minix
-	$(RM) Config
 
 .PHONY: fd720-minix
 fd720-minix: fd720-minix.img
 
-fd720-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_720K=y		> Config
-	echo CONFIG_IMG_FD720=y		>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd720-minix
-	$(RM) Config
-
 .PHONY: fd1200-minix
 fd1200-minix: fd1200-minix.img
-
-fd1200-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_1200K=y	> Config
-	echo CONFIG_IMG_FD1200=y	>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1200-minix
-	$(RM) Config
 
 .PHONY: fd1440-minix
 fd1440-minix: fd1440-minix.img
 
-fd1440-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_1440K=y	> Config
-	echo CONFIG_IMG_FD1440=y	>> Config
-	echo CONFIG_IMG_MINIX=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd1440-minix
-	$(RM) Config
-
 .PHONY: fd2880-minix
 fd2880-minix: fd2880-minix.img
 
-fd2880-minix.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_2880K=y	> Config
-	echo CONFIG_IMG_FD2880=y	>> Config
+fd%-minix.img: $(TOPDIR)/.config Make.image
+	echo CONFIG_APPS_$(fd_size)K=y		> Config
+	echo CONFIG_IMG_FD$(fd_size)=y		>> Config
 	echo CONFIG_IMG_MINIX=y		>> Config
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=fd2880-minix
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
 	$(RM) Config
 
 .PHONY: hd32-minix
