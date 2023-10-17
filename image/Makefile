@@ -138,8 +138,9 @@ hd32mbr-fat.img: hd32-fat.img $(HD_MBR_BOOT)
 hd32mbr-fat.img: SETBOOT_OPS += -Sf
 
 hd32mbr-minix.img hd32mbr-fat.img:
-	dd if=/dev/zero bs=512 count=63 | cat - $< > $@
-	setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT)
+	if ! dd if=/dev/zero of=$@ bs=512 count=63; then $(RM) $@; false; fi
+	if ! cat $< >> $@; then $(RM) $@; false; fi
+	if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT); then $(RM) $@; false; fi
 
 # Clean target
 
