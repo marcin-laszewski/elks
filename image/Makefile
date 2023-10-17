@@ -25,14 +25,14 @@ all: $(TARGETS)
 
 .PHONY: image
 image:
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
 .PHONY: copy
 copy: copyminix
 
 .PHONY: copyminix copyfat copyrom
 copyminix copyfat copyrom:
-	$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)
+	$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
 .PHONY: compress
 compress:
@@ -115,7 +115,7 @@ fd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
-		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)
+		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
 	$(RM) Config
 
 # FAT32 image
@@ -138,7 +138,7 @@ hd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
 	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
-		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)
+		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
 	$(RM) Config
 
 # MBR images
