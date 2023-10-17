@@ -19,6 +19,15 @@ ifdef CONFIG_IMG_EXTRA_IMAGES
 TARGETS += images
 endif
 
+FD_SIZES 	= 360 720 1200 1440 2880
+FDS		= $(addprefix fd,$(FD_SIZES))
+
+FDS_FAT		= $(addsuffix -fat,$(FDS))
+IMAGES_FAT	= $(addsuffix .img,$(FDS_FAT))
+
+FDS_MINIX	= $(addsuffix -minix,$(FDS))
+IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
+
 .PHONY: all clean
 
 all: $(TARGETS)
@@ -42,36 +51,23 @@ compress:
 images: images-minix images-hd images-fat
 
 .PHONY: images-minix
-images-minix: fd360-minix fd720-minix fd1200-minix fd1440-minix fd2880-minix
+images-minix: $(FDS_MINIX)
 
 .PHONY: images-fat
-images-fat: fd360-fat fd720-fat fd1200-fat fd1440-fat fd2880-fat hd32-fat hd32mbr-fat
+images-fat: $(FDS_FAT)
 
 .PHONY: images-hd
 images-hd: hd32-minix hd32mbr-minix hd64-minix
 
 fd_size	= $(subst fd,,$(firstword $(subst -, ,$@)))
 
-.PHONY: fd360-minix
+.PHONY: $(FDS_MINIX)
 fd360-minix: fd360-minix.img
-
-.PHONY: fd720-minix
 fd720-minix: fd720-minix.img
-
-.PHONY: fd1200-minix
 fd1200-minix: fd1200-minix.img
-
-.PHONY: fd1440-minix
 fd1440-minix: fd1440-minix.img
-
-.PHONY: fd2880-minix
 fd2880-minix: fd2880-minix.img
-
-fd360-minix.img \
-fd720-minix.img \
-fd1200-minix.img \
-fd1440-minix.img \
-fd2880-minix.img: TYPE=MINIX
+$(IMAGES_MINIX): TYPE=MINIX
 
 .PHONY: hd32-minix
 hd32-minix: hd32-minix.img
@@ -86,26 +82,13 @@ hd64-minix.img: BLOCKS=65535
 hd32-minix.img hd64-minix.img: CYL=127
 hd32-minix.img hd64-minix.img: TYPE=MINIX
 
-.PHONY: fd360-fat
+.PHONY: $(FDS_FAT)
 fd360-fat: fd360-fat.img
-
-.PHONY: fd720-fat
 fd720-fat: fd720-fat.img
-
-.PHONY: fd1200-fat
 fd1200-fat: fd1200-fat.img
-
-.PHONY: fd1440-fat
 fd1440-fat: fd1440-fat.img
-
-.PHONY: fd2880-fat
 fd2880-fat: fd2880-fat.img
-
-fd360-fat.img \
-fd720-fat.img \
-fd1200-fat.img \
-fd1440-fat.img \
-fd2880-fat.img: TYPE=FAT
+$(IMAGES_FAT): TYPE=FAT
 
 fd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_APPS_$(fd_size)K=y		> Config
