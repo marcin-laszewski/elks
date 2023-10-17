@@ -51,10 +51,10 @@ compress:
 images: images-minix images-hd images-fat
 
 .PHONY: images-minix
-images-minix: $(FDS_MINIX)
+images-minix: $(IMAGES_MINIX)
 
 .PHONY: images-fat
-images-fat: $(FDS_FAT)
+images-fat: $(IMAGES_FAT)
 
 .PHONY: images-hd
 images-hd: hd32-minix hd32mbr-minix hd64-minix
