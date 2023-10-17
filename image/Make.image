@@ -45,6 +45,7 @@ copyrom: romfs
 .PHONY: template
 template:
 	-rm -rf $(DESTDIR)
+	mkdir -p $(dir $(DESTDIR))
 	cp -a $(TEMPLATE_DIR) $(DESTDIR)
 	-chmod 777 $(DESTDIR)/tmp
 	find $(DESTDIR) -name .keep -delete
