@@ -12,7 +12,6 @@ HD_MBR_BOOT = $(TOPDIR)/bootblocks/mbr.bin
 
 # Directory for final filesystem to be generated from
 DESTDIR = $(TOPDIR)/target
-export DESTDIR
 
 TARGETS = image
 
@@ -26,14 +25,14 @@ all: $(TARGETS)
 
 .PHONY: image
 image:
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config"
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)
 
 .PHONY: copy
 copy: copyminix
 
 .PHONY: copyminix copyfat copyrom
 copyminix copyfat copyrom:
-	$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config"
+	$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)
 
 .PHONY: compress
 compress:
@@ -115,7 +114,8 @@ fd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)
 	$(RM) Config
 
 # FAT32 image
@@ -137,7 +137,8 @@ hd%.img: $(TOPDIR)/.config Make.image
 	echo CONFIG_IMG_DEV=y		>> Config
 	echo CONFIG_IMG_BOOT=y		>> Config
 	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" NAME=$(subst .img,,$@)
+	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)
 	$(RM) Config
 
 # MBR images
