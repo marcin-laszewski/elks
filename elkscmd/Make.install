@@ -1,5 +1,9 @@
 # ELKSCMD install Makefile
 
+ifndef V
+	V = @
+endif
+
 ifndef TOPDIR
 $(error TOPDIR is not defined, ELKS not configured yet)
 endif
@@ -162,16 +166,40 @@ endif
 
 TAGS += :end
 
+ifdef CONFIG_APP_CGATEXT
+	PKGS += cgatext
+endif
+ifdef CONFIG_APP_ROMPRG
+	PKGS += romprg
+endif
+PKGS += $(INSTDIRS)
+
+TARGETS	+= elks-pkgs
+TARGETS += $(PKGS)
+ifdef CONFIG_APP_BUSYELKS
+TARGET += busyelks-links
+endif
+
+MAN_SECTIONS = 1 2 4 5 7 8
+
+ifdef CONFIG_APP_MAN_PAGES
+TARGETS += $(addprefix $(DESTDIR)/lib/man,$(MAN_SECTIONS))
+endif
+
+$(info TARGETS $(TARGETS))
+
 ###############################################################################
 #
 # Install selected files.
 
 .PHONY: install
+install: $(TARGETS)
 
 # use bash instead of /bin/sh for curly brace expansion
 SHELL=/bin/bash
-install:
-	@echo "TAGS=$(TAGS)" | tr -d ' '
+
+.PHONY: elks-pkgs
+elks-pkgs:
 	awk /`echo "$(TAGS)" | tr -d ' '`/{print} $(PACKAGE) | sed '/^#/d' > Filelist
 	@while IFS= read -r line; \
 	do \
@@ -207,36 +235,20 @@ install:
 		fi \
 	done < Filelist
 	rm Filelist
-ifdef CONFIG_APP_BUSYELKS
-	$(MAKE) -C busyelks links
-endif
-	for DIR in $(INSTDIRS); do $(MAKE) -C $$DIR install || exit 1; done
-ifdef CONFIG_APP_CGATEXT
-	$(MAKE) -C cgatext install
-endif
-ifdef CONFIG_APP_ROMPRG
-	$(MAKE) -C romprg install
-endif
-ifdef CONFIG_APP_MAN_PAGES
-	mkdir -p $(DESTDIR)/lib/man1
-	cp -rp man/man1 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man1/*
-	mkdir -p $(DESTDIR)/lib/man2
-	cp -rp man/man2 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man2/*
-	mkdir -p $(DESTDIR)/lib/man4
-	cp -rp man/man4 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man4/*
-	mkdir -p $(DESTDIR)/lib/man5
-	cp -rp man/man5 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man5/*
-	mkdir -p $(DESTDIR)/lib/man7
-	cp -rp man/man7 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man7/*
-	mkdir -p $(DESTDIR)/lib/man8
-	cp -rp man/man8 $(DESTDIR)/lib
-	-compress -b 12 $(DESTDIR)/lib/man8/*
-endif
 
+.PHONY: $(PKGS)
+$(PKGS):
+	@echo 'PKGS	$@'
+	$(MAKE) -C $@ install
+
+.PHONY: busyelks-links
+busyelks-links:
+	$(MAKE) -C busyelks links
+
+$(DESTDIR)/lib/man%:
+	@echo 'MAN	$(subst $(DESTDIR)/lib/,,$@)'
+	$(V)cp -rp man/$(subst $(DESTDIR)/lib/,,$@) $(DESTDIR)/lib
+	@echo 'MAN-Z	$(subst $(DESTDIR)/lib/,,$@)'
+	$(V)find $@ -type f | xargs -r compress -b 12
 
 ###############################################################################
