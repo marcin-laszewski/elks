@@ -38,16 +38,16 @@ PRGS = \
 
 all: $(PRGS)
 
-cp: OBJS += $(TINYPRINTF)
+cp: $(TINYPRINTF)
 cp: LDFLAGS += -maout-heap=0xffff
 dd: LDFLAGS += -maout-heap=12288
 ls: LDFLAGS += -maout-heap=20480
-rm: OBJS += $(TINYPRINTF)
+rm: $(TINYPRINTF)
 rm: LDFLAGS += -maout-stack=12228
 
 %: %.o
 	@echo 'LD	$@'
-	$(V)$(LD) $(LDFLAGS) -o $@ $^ $(OBJS) $(LDLIBS)
+	$(V)$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 install: $(PRGS)
 	@echo 'INSTALL	$(PROGS)'
