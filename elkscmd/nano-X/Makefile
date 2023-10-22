@@ -9,6 +9,8 @@ include $(BASEDIR)/Make.defs
 LOCALFLAGS = -DELKS=1 -DUNIX=1 -DDEBUG=1 -I.
 MATHLIB =
 
+INSTALL	?= install
+
 # nano-X demo programs
 NANOXDEMOS = bin/nxlandmine
 NANOXDEMOS += bin/nxworld
@@ -19,6 +21,7 @@ NANOXDEMOS += bin/nxtetris
 NANOXDEMOS += bin/nxdemo
 #NANOXDEMOS += bin/nxdemo2
 #NANOXDEMOS += bin/nxvgatest		# low-level vga routines test
+NANOXDEMOS += bin/nxworld.map
 
 # mouse and kbd drivers
 # SLOW_CPU discards unprocessed mouse input for slow systems
@@ -85,34 +88,35 @@ libnano-X.a: $(CLNTFILES)
 
 salibs: $(SERVFILES) $(NANOXFILES)
 
-bin/nxlandmine: demos/landmine.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
+bin/nxworld.map: demos/nxworld.map
+	@echo 'CP	$@'
+	$(V)cp $< $@
 
-bin/nxworld: demos/world.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
-	cp demos/nxworld.map bin/nxworld.map
+bin/nxclock \
+bin/nxlandmine \
+bin/nxworld \
+bin/nxterm \
+bin/nxtest \
+bin/nxtetris \
+bin/nxdemo \
+bin/nxdemo2 \
+: $(NANOXFILES) $(SERVFILES)
 
-bin/nxclock: demos/nclock.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
+bin/nx%: demos/%.o
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
-bin/nxterm: demos/nterm.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
+bin/nx%: demos/n%.o $(NANOXFILES) $(SERVFILES)
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxtetris: demos/ntetris.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) -maout-heap=0xffff $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
-
-bin/nxtest: demos/nxtest.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
-
-bin/nxdemo: demos/demo.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
-
-bin/nxdemo2: demos/demo2.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) -maout-heap=0xffff $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxvgatest: demos/demo-vga.o
-	$(LD) $(LDFLAGS) $^ $(DRIVERS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
-
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) $^ $(DRIVERS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 #
 # client/server
@@ -137,8 +141,6 @@ nxdemos: \
 bin/demo.sh: scripts/demo.sh
 	cp $< $@
 
-$(info DEMOLIBS $(DEMOLIBS))
-
 bin/demo \
 bin/demo2 \
 bin/landmine \
@@ -151,14 +153,27 @@ bin/%: demos/%.o
 	@echo 'LD	$@'
 	$(V)$(LD) $(LDFLAGS) $^ $(DEMOLIBS) -o $@ $(MATHLIB)
 
-install: $(NANOXDEMOS)
-	$(INSTALL) $(NANOXDEMOS) $(DESTDIR)/bin
-	$(INSTALL) demos/nxworld.map $(DESTDIR)/lib/nxworld.map
+.PHONY: install
+install: \
+ $(addprefix $(DESTDIR)/,$(NANOXDEMOS)) \
+ $(DESTDIR)/lib/nxworld.map \
 
+$(DESTDIR)/bin/%: bin/%
+	@echo 'INSTALL	$@'
+	$(V)$(INSTALL) -d $(dir $@)
+	$(V)$(INSTALL) $< $@
+
+$(DESTDIR)/lib/nxworld.map: demos/nxworld.map
+	@echo 'INSTALL	$@'
+	$(V)$(INSTALL) -d $(dir $@)
+	$(V)$(INSTALL) $< $@
+
+.PHONY: clean
 clean:
-	$(RM) *.o *.a nano-X core
-	$(RM) drivers/*.o
-	$(RM) bin/*
-	$(RM) nanox/*.o
-	$(RM) engine/*.o
-	$(RM) demos/*.o
+	$(RM) \
+		*.a \
+		nano-X \
+		core \
+		$(DRIVERS) \
+		$(NANOXDEMOS) $(NANOXFILES) $(CLNTFILES) $(NETFILES) $(STUBFILES) \
+		$(SERVFILES) demos/*.o
