@@ -86,49 +86,70 @@ libnano-X.a: $(CLNTFILES)
 salibs: $(SERVFILES) $(NANOXFILES)
 
 bin/nxlandmine: demos/landmine.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/landmine.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxlandmine $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxworld: demos/world.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/world.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxworld $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 	cp demos/nxworld.map bin/nxworld.map
 
 bin/nxclock: demos/nclock.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/nclock.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxclock $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxterm: demos/nterm.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/nterm.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxterm $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxtetris: demos/ntetris.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) -maout-heap=0xffff $(NANOXFILES) demos/ntetris.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxtetris $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) -maout-heap=0xffff $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxtest: demos/nxtest.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/nxtest.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxtest $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxdemo: demos/demo.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/demo.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxdemo $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxdemo2: demos/demo2.o $(NANOXFILES) $(SERVFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) demos/demo2.o $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nxdemo2 $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 bin/nxvgatest: demos/demo-vga.o
-	$(LD) $(LDFLAGS) demos/demo-vga.o $(DRIVERS) $(LIBS) -o bin/nxvgatest $(MATHLIB) $(LDLIBS)
+	$(LD) $(LDFLAGS) $^ $(DRIVERS) $(LIBS) -o $@ $(MATHLIB) $(LDLIBS)
 
 
 #
 # client/server
 #
-nano-X: $(SERVFILES) $(NANOXFILES)
-	$(LD) $(LDFLAGS) $(NANOXFILES) $(SERVFILES) $(NANOLIBS) $(LIBS) -o bin/nano-X $(MATHLIB) $(LDFLAGS)
+.PHONY: nano-X
+nano-X: bin/nano-X
+
+bin/nano-X: $(SERVFILES) $(NANOXFILES)
+	$(LD) $(LDFLAGS) $^ $(NANOLIBS) $(LIBS) -o $@ $(MATHLIB)
 
 # only a few demos work in client/server mode
-nxdemos: libnano-X.a
-	$(LD) $(LDFLAGS) demos/demo.o $(DEMOLIBS) -o bin/demo $(MATHLIB) $(LDFLAGS)
-	$(LD) $(LDFLAGS) demos/demo2.o $(DEMOLIBS) -o bin/demo2 $(MATHLIB) $(LDFLAGS)
-	$(LD) $(LDFLAGS) demos/landmine.o $(DEMOLIBS) -o bin/landmine $(MATHLIB) $(LDFLAGS)
-#	$(LD) $(LDFLAGS) demos/nterm.o $(DEMOLIBS) -o bin/nterm $(MATHLIB)	 $(LDFLAGS)
-#	$(LD) $(LDFLAGS) demos/nclock.o $(DEMOLIBS) -o bin/nclock $(MATHLIB)	 $(LDFLAGS)
-#	$(LD) $(LDFLAGS) demos/world.o $(DEMOLIBS) -o bin/world $(MATHLIB) $(LDFLAGS)
-#	cp scripts/demo.sh bin/demo.sh
+.PHONY: nxdemos
+nxdemos: \
+ bin/demo.sh \
+ bin/demo \
+ bin/demo2 \
+ bin/landmine
+# bin/nterm \
+# bin/nclock \
+# bin/world \
+
+bin/demo.sh: scripts/demo.sh
+	cp $< $@
+
+$(info DEMOLIBS $(DEMOLIBS))
+
+bin/demo \
+bin/demo2 \
+bin/landmine \
+: $(DEMOLIBS)
+# bin/nterm \
+# bin/nclock \
+# bin/world \
+
+bin/%: demos/%.o
+	@echo 'LD	$@'
+	$(V)$(LD) $(LDFLAGS) $^ $(DEMOLIBS) -o $@ $(MATHLIB)
 
 install: $(NANOXDEMOS)
 	$(INSTALL) $(NANOXDEMOS) $(DESTDIR)/bin
