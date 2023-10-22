@@ -128,7 +128,7 @@ nxdemos: libnano-X.a
 #	$(LD) $(LDFLAGS) demos/nterm.o $(DEMOLIBS) -o bin/nterm $(MATHLIB)	 $(LDFLAGS)
 #	$(LD) $(LDFLAGS) demos/nclock.o $(DEMOLIBS) -o bin/nclock $(MATHLIB)	 $(LDFLAGS)
 #	$(LD) $(LDFLAGS) demos/world.o $(DEMOLIBS) -o bin/world $(MATHLIB) $(LDFLAGS)
-#	cp demos/demo.sh bin/demo.sh
+#	cp scripts/demo.sh bin/demo.sh
 
 install: $(NANOXDEMOS)
 	$(INSTALL) $(NANOXDEMOS) $(DESTDIR)/bin
