@@ -91,7 +91,8 @@ fd2880-fat: fd2880-fat.img
 $(IMAGES_FAT): TYPE=FAT
 
 fd%.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_$(fd_size)K=y		> Config
+	cp $< Config
+	echo CONFIG_APPS_$(fd_size)K=y		>> Config
 	echo CONFIG_IMG_FD$(fd_size)=y		>> Config
 	echo CONFIG_IMG_$(TYPE)=y		>> Config
 	echo CONFIG_IMG_DEV=y		>> Config
