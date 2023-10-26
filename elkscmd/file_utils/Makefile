@@ -55,4 +55,4 @@ install: $(PRGS)
 
 clean:
 	@echo 'CLEAN'
-	$(V)$(RM) $(PRGS)
+	$(V)$(RM) $(PRGS) $(addsuffix .o,$(PRGS))
