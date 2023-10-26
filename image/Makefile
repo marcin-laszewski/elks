@@ -23,7 +23,7 @@ FD_SIZES 	= 360 720 1200 1440 2880
 FDS		= $(addprefix fd,$(FD_SIZES))
 
 FDS_FAT		= $(addsuffix -fat,$(FDS))
-IMAGES_FAT	= $(addsuffix .img,$(FDS_FAT))
+IMAGES_FAT	= $(addsuffix .img,$(FDS_FAT) hd32-fat)
 
 FDS_MINIX	= $(addsuffix -minix,$(FDS))
 IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
