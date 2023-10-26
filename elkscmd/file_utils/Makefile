@@ -45,6 +45,8 @@ ls: LDFLAGS += -maout-heap=20480
 rm: $(TINYPRINTF)
 rm: LDFLAGS += -maout-stack=12228
 
+%: %.c
+
 %: %.o
 	@echo 'LD	$@'
 	$(V)$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
