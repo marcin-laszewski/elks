@@ -103,7 +103,7 @@ fd%.img: $(TOPDIR)/.config Make.image
 	$(RM) Config
 
 # FAT32 image
-.PHONY: fd2880-fat
+.PHONY: hd32-fat
 hd32-fat: hd32-fat.img
 
 hd32-fat.img: BLOCKS=31752
