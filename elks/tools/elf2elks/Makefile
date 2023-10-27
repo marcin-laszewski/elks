@@ -11,8 +11,13 @@
 DEFAULT_TARBALL	= elftoolchain-0.7.1.tar.bz2
 DEFAULT_INSTDIR	= ../bin
 
+# Define the variables required by the standard rules - see the standard
+# rules file (below) for details of these variables.
+
+USEBCC 		= N
+
 TARBALL	?= $(DEFAULT_TARBALL)
-NAME	= $(subst .xz,,$(subst .tar,,$(subst .gz,,$(subst .bz2,,$(TARBALL)))))
+override NAME	= $(subst .xz,,$(subst .tar,,$(subst .gz,,$(subst .bz2,,$(TARBALL)))))
 SRC	= $(NAME)
 INSTDIR	?= $(DEFAULT_INSTDIR)
 OUT	= elf2elks

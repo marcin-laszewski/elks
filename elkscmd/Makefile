@@ -86,11 +86,13 @@ install:
 CLEANS	= $(addprefix clean-,$(SUBDIRS) $(PROGS))
 
 .PHONY: clean
-clean: $(CLEANS)
+clean: $(CLEANS) install-clean
 
 .PHONY: $(CLEANS)
 $(CLEANS):
 	@echo 'CLEAN	$@'
 	$(MAKE) -C $(subst clean-,,$@) clean V=$(V)
 
-###############################################################################
+.PHONY: install-clean
+install-clean:
+	$(MAKE) -f Make.install clean

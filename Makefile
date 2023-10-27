@@ -15,7 +15,7 @@ ifneq ($(shell uname), Darwin)
 endif
 
 .PHONY: image
-image: .config include/autoconf.h kernel boot elkscmd
+image: .config include/autoconf.h kernel boot libc-install
 	$(MAKE) -C image all
 
 .PHONY: kernel

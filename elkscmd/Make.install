@@ -32,139 +32,137 @@ endif
 # Install apps by source directory
 #
 ifdef CONFIG_APP_ASH
-	TAGS += :ash|
+	TAGS += ash
 endif
 
 ifdef CONFIG_APP_BUSYELKS
-	TAGS += :busyelks|
+	TAGS += busyelks
 endif
 
 ifdef CONFIG_APP_DISK_UTILS
-	TAGS += :diskutil|
+	TAGS += diskutil
 	ifeq ($(CONFIG_APP_DISK_UTILS), y)
-		TAGS += :be-diskutil|
+		TAGS += be-diskutil
 	endif
 endif
 
 ifdef CONFIG_APP_FILE_UTILS
-	TAGS += :fileutil|
+	TAGS += fileutil
 	ifeq ($(CONFIG_APP_FILE_UTILS), y)
-		TAGS += :be-fileutil|
+		TAGS += be-fileutil
 	endif
 endif
 
 ifdef CONFIG_APP_ELVIS
-	TAGS += :elvis|
+	TAGS += elvis
 endif
 
 ifdef CONFIG_APP_KTCP
-	TAGS += :net|
+	TAGS += net
 endif
 
 ifdef CONFIG_APP_MINIX1
-	TAGS += :minix1|
+	TAGS += minix1
 	ifeq ($(CONFIG_APP_MINIX1), y)
-		TAGS += :be-minix1|
+		TAGS += be-minix1
 	endif
 endif
 
 ifdef CONFIG_APP_MINIX2
-	TAGS += :minix2|
+	TAGS += minix2
 endif
 
 ifdef CONFIG_APP_MINIX3
-	TAGS += :minix3|
+	TAGS += minix3
 	ifeq ($(CONFIG_APP_MINIX3), y)
-		TAGS += :be-minix3|
+		TAGS += be-minix3
 	endif
 endif
 
 ifdef CONFIG_APP_MISC_UTILS
-	TAGS += :miscutil|
+	TAGS += miscutil
 	ifeq ($(CONFIG_APP_MISC_UTILS), y)
-		TAGS += :be-miscutil|
+		TAGS += be-miscutil
 	endif
 endif
 
 ifdef CONFIG_APP_TUI
-	TAGS += :tui|
+	TAGS += tui
 endif
 
 ifdef CONFIG_APP_NANOX
-	TAGS += :nanox|
+	TAGS += nanox
 endif
 
 ifdef CONFIG_APP_BASIC
-	TAGS += :basic|
+	TAGS += basic
 endif
 
 ifdef CONFIG_APP_OTHER
-	TAGS += :other|
+	TAGS += other
 endif
 
 ifdef CONFIG_APP_SASH
-	TAGS += :sash|
+	TAGS += sash
 endif
 
 ifdef CONFIG_APP_SCREEN
-	TAGS += :screen|
+	TAGS += screen
 endif
 
 ifdef CONFIG_APP_CRON
-	TAGS += :cron|
+	TAGS += cron
 endif
 
 ifdef CONFIG_APP_SH_UTILS
-	TAGS += :shutil|
+	TAGS += shutil
 	ifeq ($(CONFIG_APP_SH_UTILS), y)
-		TAGS += :be-shutil|
+		TAGS += be-shutil
 	endif
 endif
 
 ifdef CONFIG_APP_SYS_UTILS
-	TAGS += :sysutil|
+	TAGS += sysutil
 endif
 
 ifdef CONFIG_APP_TEST
-	TAGS += :test|
+	TAGS += test
 endif
 
 #
 # Install apps by image size
 #
 ifdef CONFIG_APPS_360K
-	TAGS = :boot|:360k|
+	TAGS = boot 360k
 endif
 
 ifdef CONFIG_APPS_720K
-	TAGS = :boot|:360k|:net|:720k|
+	TAGS = boot 360k net 720k
 endif
 
 ifdef CONFIG_APPS_1200K
-	TAGS = :boot|:360k|:net|:720k|:1200k|
+	TAGS = boot 360k net 720k 1200k
 endif
 
 ifdef CONFIG_APPS_1232K
-	TAGS = :boot|:360k|:net|:720k|:1200k|
+	TAGS = boot 360k net 720k 1200k
 endif
 
 ifdef CONFIG_APPS_1440K
-	TAGS = :boot|:360k|:net|:720k|:1200k|:1440k|
+	TAGS = boot 360k net 720k 1200k 1440k
 endif
 
 ifdef CONFIG_APPS_2880K
     # below TAGS relies on :ash rule following :defsash rule in Applications
-	TAGS = :*|
+	#TAGS = :*|
 	CONFIG_APP_MAN_PAGES=y
 endif
 
 #
 # System startup
 ifdef CONFIG_SYS_DEFSHELL_SASH
-	TAGS += :defsash|
+	TAGS += defsash
 endif
-
-TAGS += :end
 
 ifdef CONFIG_APP_CGATEXT
 	PKGS += cgatext
@@ -174,8 +172,29 @@ ifdef CONFIG_APP_ROMPRG
 endif
 PKGS += $(INSTDIRS)
 
-TARGETS	+= elks-pkgs
 TARGETS += $(PKGS)
+ifdef CONFIG_APP_BUSYELKS
+TARGET += busyelks-links
+endif
+
+MAN_SECTIONS = 1 2 4 5 7 8
+
+ifdef CONFIG_APP_MAN_PAGES
+TARGETS += $(addprefix $(DESTDIR)/lib/man,$(MAN_SECTIONS))
+endif
+
+$(info TARGETS $(TARGETS))
+
+ifdef CONFIG_APP_CGATEXT
+	PKGS += cgatext
+endif
+ifdef CONFIG_APP_ROMPRG
+	PKGS += romprg
+endif
+PKGS += $(INSTDIRS)
+
+TARGETS += $(PKGS)
+
 ifdef CONFIG_APP_BUSYELKS
 TARGET += busyelks-links
 endif
@@ -193,53 +212,17 @@ $(info TARGETS $(TARGETS))
 # Install selected files.
 
 .PHONY: install
-install: $(TARGETS)
+install: $(TARGETS) $(TAGS)
 
-# use bash instead of /bin/sh for curly brace expansion
-SHELL=/bin/bash
+include elkscmd.mk
+include apps.mk
 
-.PHONY: elks-pkgs
-elks-pkgs:
-	awk /`echo "$(TAGS)" | tr -d ' '`/{print} $(PACKAGE) | sed '/^#/d' > Filelist
-	@while IFS= read -r line; \
-	do \
-		file=`echo $$line | cut -d" " -f 1`; \
-		dir=`echo $$line | cut -d" " -f 2`; \
-		link=no; \
-		if [ "$${dir:0:3}" == ":::" ]; \
-		then \
-			instdir=$${dir:3}; \
-			link=yes; \
-		else \
-			if [ "$${dir:0:2}" == "::" ]; \
-			then \
-				instdir=$${dir:2}; \
-			else \
-				instdir=bin; \
-			fi; \
-		fi; \
-		echo install $$file to $$instdir; \
-		if [ ! -e $$file ]; \
-		then \
-			echo "File specified in $(PACKAGE) not found: $$file"; \
-			exit 1; \
-		else \
-			if [ "$$link" == "yes" ]; \
-			then \
-				echo ln -s $$(basename $$file) $$instdir; \
-				ln -s $$(basename $$file) $(DESTDIR)/bin/$$instdir; \
-			else \
-				[ ! -d $$file ] && mkdir -p $$(dirname $(DESTDIR)/$$instdir); \
-				[ -f $$file ] && $(INSTALL) $$file $(DESTDIR)/$$instdir; \
-			fi; \
-		fi \
-	done < Filelist
-	rm Filelist
-
-.PHONY: $(PKGS)
-$(PKGS):
-	@echo 'PKGS	$@'
-	$(MAKE) -C $@ install
+apps.mk: Applications $(CONFIG) apps.awk
+	if ! ./apps.awk -v 'srcdir=./' -v 'dstdir=$(DESTDIR)/' -v "tags=$(TAGS)" < $< > $@; \
+	then \
+		$(RM) $@; \
+		false; \
+	fi
 
 .PHONY: busyelks-links
 busyelks-links:
@@ -251,4 +234,6 @@ $(DESTDIR)/lib/man%:
 	@echo 'MAN-Z	$(subst $(DESTDIR)/lib/,,$@)'
 	$(V)find $@ -type f | xargs -r compress -b 12
 
-###############################################################################
+.PHONY: clean
+clean:
+	$(RM) apps.mk
