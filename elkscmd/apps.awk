@@ -27,7 +27,7 @@ function basename(path)
     file = $1;
     if (NF > 1) {
       if (substr($2, 1, 3) == ":::") {
-        path = dstdir substr($2, 4);
+        path = dstdir "bin/" substr($2, 4);
         link = basename(file);
         i = 3;
       }
