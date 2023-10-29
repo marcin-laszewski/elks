@@ -45,9 +45,6 @@ inet/telnetd/telnetd \
 inet/telnet/telnet \
 inet/tinyirc/tinyirc \
 inet/urlget/urlget \
-inet/urlget/urlget \
-inet/urlget/urlget \
-inet/urlget/urlget \
 ktcp/ktcp \
 m4/m4 \
 minix1/banner \
@@ -142,7 +139,6 @@ sys_utils/mouse \
 sys_utils/passwd \
 sys_utils/poweroff \
 sys_utils/ps \
-sys_utils/ps \
 sys_utils/reboot \
 sys_utils/sercat \
 sys_utils/shutdown \
@@ -192,7 +188,6 @@ sh_utils/which \
 sh_utils/mesg \
 sys_utils/getty \
 sys_utils/mount \
-sys_utils/ps \
 : lib/tiny_vfprintf.o
 
 lib/tiny_vfprintf.o: lib/tiny_vfprintf.c
