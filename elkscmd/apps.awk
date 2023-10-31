@@ -50,7 +50,9 @@ function basename(path)
             is_included = 1;
             if (!(t in tag))
               tag[t] = 0;
-            tag_target[t, tag[t]++] = path;
+            tag_build[t, tag[t]] = srcdir file;
+            tag_install[t, tag[t]] = path;
+            tag[t]++
           }
         }
         i++;
@@ -67,6 +69,19 @@ function basename(path)
         }
       }
     }
+  }
+}
+
+function create_targets(name, prefix, tag, tag_targets,	t, i)
+{
+  printf "#--- %s\n", name;
+
+  for (t in tag) {
+    printf ".PHONY: %s%s\n",prefix, t;
+    printf "%s%s: \\\n", prefix, t;
+    for (i = 0; i < tag[t]; i++)
+      printf " %s \\\n", tag_targets[t, i];
+    print "";
   }
 }
 
@@ -90,15 +105,31 @@ END {
   print "\tln -s $(LINK) $@";
   print "";
 
-  for (t in tag) {
-    printf ".PHONY: %s\n", t;
-    printf "%s: \\\n", t;
-    for (i = 0; i < tag[t]; i++)
-      printf " %s \\\n", tag_target[t, i];
-    print "";
-    delete tag_list[t];
-  }
+  create_targets("build", "", tag, tag_build);
+##  print "#--- build"
+##  for (t in tag) {
+##    printf ".PHONY: %s\n", t;
+##    printf "%s: \\\n", t;
+##    for (i = 0; i < tag[t]; i++)
+##      printf " %s \\\n", tag_build[t, i];
+##    print "";
+##  }
 
+  create_targets("install", "install-", tag, tag_install);
+##  print "--- install"
+##  for (t in tag) {
+##    printf ".PHONY: install-%s\n", t;
+##    printf "install-%s: \\\n", t;
+##    for (i = 0; i < tag[t]; i++)
+##      printf " %s \\\n", tag_install[t, i];
+##    print "";
+##    delete tag_list[t];
+##  }
+
+  for (t in tag)
+    delete tag_list[t];
+
+  print "#2------"
   for (t in tag_list) {
     printf ".PHONY: %s\n", t;
     printf "%s:\n\n", t

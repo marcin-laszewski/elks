@@ -193,6 +193,13 @@ sys_utils/mount \
 lib/tiny_vfprintf.o: lib/tiny_vfprintf.c
 	$(V)make -C $(dir $@) $(notdir $@)
 
+$(DESTDIR)/usr/bin/cgatext \
+ :
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(DESTDIR)/usr/bin/cgatext: cgatext/cgatext
+
 cgatext/cgatext \
 misc_utils/fdtest \
 : ../elks/arch/i86/lib/lib86.a

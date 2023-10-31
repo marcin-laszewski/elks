@@ -45,7 +45,7 @@ copyminix copyfat copyrom:
 
 .PHONY: compress
 compress:
-	cd $(TOPDIR)/target/bin && elks-compress *
+	cd $(TOPDIR)/target/bin && elks-compress * || true
 
 .PHONY: images
 images: images-minix images-hd images-fat

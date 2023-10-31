@@ -30,6 +30,8 @@ ifdef CONFIG_IMG_RAW
 TARGETS += raw
 endif
 
+$(info TARGETS	$(TARGETS))
+
 .PHONY: image $(TARGETS)
 
 image: $(TARGETS)
@@ -49,9 +51,9 @@ template:
 	cp -a $(TEMPLATE_DIR) $(DESTDIR)
 	-chmod 777 $(DESTDIR)/tmp
 	find $(DESTDIR) -name .keep -delete
-	$(MAKE) -C $(ELKSCMD_DIR) -f Make.install install "CONFIG=$(CONFIG)"
+	$(MAKE) -C $(ELKSCMD_DIR) install "CONFIG=$(CONFIG)"
 ifdef CONFIG_APPS_COMPRESS
-	cd $(TOPDIR)/target/bin; elks-compress *
+	cd $(DESTDIR)/bin && elks-compress * || true
 endif
 	$(MAKE) -C $(BOOTBLOCKS_DIR)
 	bash -c "./ver.pl $(ELKS_DIR)/Makefile-rules > $(DESTDIR)/etc/issue"
