@@ -33,6 +33,10 @@ boot: .config include/autoconf.h
 elkscmd: .config include/autoconf.h libc-install $(LIB86)
 	$(MAKE) -C elkscmd all
 
+.PHONY: elkscmd-clean elkscmd-install
+elkscmd-clean elkscmd-install:
+	$(MAKE) -C elkscmd $(subst elkscmd-,,$@)
+
 .PHONY: tools-elf2elks
 tools-elf2elks:
 	$(MAKE) -C elks/tools/elf2elks
