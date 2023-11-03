@@ -99,10 +99,10 @@ fd1440-fat: fd1440-fat.img
 fd2880-fat: fd2880-fat.img
 $(IMAGES_FAT): TYPE=FAT
 
-fd%.img: fd%.cfg Make.image
-	$(INFO) 'IMG-FD	$@'
-	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
-		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
+%.img: %.cfg Make.image
+	$(INFO) 'IMG	$@'
+	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) NAME=$(subst .img,,$@) \
+		DESTDIR=$(DESTDIR)/$(basename $@)
 
 fd%.cfg: $(TOPDIR)/.config
 	$(INFO) 'CFG-FD	$@'
@@ -121,11 +121,6 @@ hd32-fat: hd32-fat.img
 hd32-fat.img: BLOCKS=31752
 hd32-fat.img: CYL=63
 hd32-fat.img: TYPE=FAT
-
-hd%.img: hd%.cfg Make.image
-	$(INFO) 'IMG-HD	$@'
-	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
-		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
 
 hd%.cfg: $(TOPDIR)/.config
 	$(INFO) 'CFG-HD	$@'
