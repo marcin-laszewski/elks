@@ -1,5 +1,11 @@
 # Makefile for the ELKS images
 
+ifndef V
+	V = @
+endif
+
+INFO = @echo
+
 ifndef TOPDIR
 $(error TOPDIR is not defined, ELKS not configured yet)
 endif
@@ -34,18 +40,21 @@ all: $(TARGETS)
 
 .PHONY: image
 image:
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
+	$(INFO) 'MAKE	$@'
+	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
 .PHONY: copy
 copy: copyminix
 
 .PHONY: copyminix copyfat copyrom
 copyminix copyfat copyrom:
-	$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
+	$(INFO) 'MAKE	$@'
+	$(V)$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
 .PHONY: compress
 compress:
-	cd $(TOPDIR)/target/bin && elks-compress * || true
+	$(INFO)	'COMPRESS'
+	$(V)cd $(TOPDIR)/target/bin && elks-compress * || true
 
 .PHONY: images
 images: images-minix images-hd images-fat
@@ -91,16 +100,17 @@ fd2880-fat: fd2880-fat.img
 $(IMAGES_FAT): TYPE=FAT
 
 fd%.img: $(TOPDIR)/.config Make.image
-	cp $< Config
-	echo CONFIG_APPS_$(fd_size)K=y		>> Config
-	echo CONFIG_IMG_FD$(fd_size)=y		>> Config
-	echo CONFIG_IMG_$(TYPE)=y		>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+	$(INFO) 'IMG-FD	$@'
+	$(V)cp $< Config
+	$(V)echo CONFIG_APPS_$(fd_size)K=y		>> Config
+	$(V)echo CONFIG_IMG_FD$(fd_size)=y		>> Config
+	$(V)echo CONFIG_IMG_$(TYPE)=y		>> Config
+	$(V)echo CONFIG_IMG_DEV=y		>> Config
+	$(V)echo CONFIG_IMG_BOOT=y		>> Config
+	$(V)sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
+	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
 		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
-	$(RM) Config
+	$(V)$(RM) Config
 
 # FAT32 image
 .PHONY: hd32-fat
@@ -111,19 +121,20 @@ hd32-fat.img: CYL=63
 hd32-fat.img: TYPE=FAT
 
 hd%.img: $(TOPDIR)/.config Make.image
-	echo CONFIG_APPS_2880K=y	> Config
-	echo CONFIG_IMG_HD=y		>> Config
-	echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
-	echo CONFIG_IMG_SECT=63		>> Config
-	echo CONFIG_IMG_HEAD=16		>> Config
-	echo CONFIG_IMG_CYL=$(CYL)	>> Config
-	echo CONFIG_IMG_$(TYPE)=y	>> Config
-	echo CONFIG_IMG_DEV=y		>> Config
-	echo CONFIG_IMG_BOOT=y		>> Config
-	sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+	$(INFO) 'IMG-HD	$@'
+	$(V)echo CONFIG_APPS_2880K=y	> Config
+	$(V)echo CONFIG_IMG_HD=y		>> Config
+	$(V)echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
+	$(V)echo CONFIG_IMG_SECT=63		>> Config
+	$(V)echo CONFIG_IMG_HEAD=16		>> Config
+	$(V)echo CONFIG_IMG_CYL=$(CYL)	>> Config
+	$(V)echo CONFIG_IMG_$(TYPE)=y	>> Config
+	$(V)echo CONFIG_IMG_DEV=y		>> Config
+	$(V)echo CONFIG_IMG_BOOT=y		>> Config
+	$(V)sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
+	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
 		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
-	$(RM) Config
+	$(V)$(RM) Config
 
 # MBR images
 .PHONY: hd32mbr-minix
@@ -139,13 +150,15 @@ hd32mbr-fat.img: hd32-fat.img $(HD_MBR_BOOT)
 hd32mbr-fat.img: SETBOOT_OPS += -Sf
 
 hd32mbr-minix.img hd32mbr-fat.img:
-	if ! dd if=/dev/zero of=$@ bs=512 count=63; then $(RM) $@; false; fi
-	if ! cat $< >> $@; then $(RM) $@; false; fi
-	if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT); then $(RM) $@; false; fi
+	$(INFO) 'IMG-MBR	$@'
+	$(V)if ! dd if=/dev/zero of=$@ bs=512 count=63; then $(RM) $@; false; fi
+	$(V)if ! cat $< >> $@; then $(RM) $@; false; fi
+	$(V)if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT); then $(RM) $@; false; fi
 
 # Clean target
 
 .PHONY: clean
 clean:
-	-$(RM) -r $(DESTDIR)
-	-$(RM) *.img *.bin
+	$(INFO) 'CLEAN'
+	$(V)-$(RM) -r $(DESTDIR)
+	$(V)-$(RM) *.img *.bin
