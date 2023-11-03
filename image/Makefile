@@ -155,10 +155,18 @@ hd32mbr-minix.img hd32mbr-fat.img:
 	$(V)if ! cat $< >> $@; then $(RM) $@; false; fi
 	$(V)if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT); then $(RM) $@; false; fi
 
-# Clean target
-
 .PHONY: clean
-clean:
-	$(INFO) 'CLEAN'
-	$(V)-$(RM) -r $(DESTDIR)
-	$(V)-$(RM) *.img *.bin
+clean: clean-destdir clean-images
+
+.PHONY: clean-destdir
+clean-destdir:
+	$(INFO) 'CLEAN	$@'
+	$(V)$(RM) -r $(DESTDIR)
+
+.PHONY: clean-images
+clean-images:
+	$(INFO) 'CLEAN	$@'
+	$(V)$(RM) $(IMAGES_FAT) $(IMAGES_MINIX) \
+		fd1440.img \
+		hd32-minix.img hd64-minix.img \
+		hd32mbr-fat.img hd32mbr-minix.img \
