@@ -99,18 +99,20 @@ fd1440-fat: fd1440-fat.img
 fd2880-fat: fd2880-fat.img
 $(IMAGES_FAT): TYPE=FAT
 
-fd%.img: $(TOPDIR)/.config Make.image
+fd%.img: fd%.cfg Make.image
 	$(INFO) 'IMG-FD	$@'
-	$(V)cp $< Config
-	$(V)echo CONFIG_APPS_$(fd_size)K=y		>> Config
-	$(V)echo CONFIG_IMG_FD$(fd_size)=y		>> Config
-	$(V)echo CONFIG_IMG_$(TYPE)=y		>> Config
-	$(V)echo CONFIG_IMG_DEV=y		>> Config
-	$(V)echo CONFIG_IMG_BOOT=y		>> Config
-	$(V)sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
 		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
-	$(V)$(RM) Config
+
+fd%.cfg: $(TOPDIR)/.config
+	$(INFO) 'CFG-FD	$@'
+	$(V)cp $< $@
+	$(V)echo CONFIG_APPS_$(fd_size)K=y	>> $@
+	$(V)echo CONFIG_IMG_FD$(fd_size)=y	>> $@
+	$(V)echo CONFIG_IMG_$(TYPE)=y		>> $@
+	$(V)echo CONFIG_IMG_DEV=y		>> $@
+	$(V)echo CONFIG_IMG_BOOT=y		>> $@
+	$(V)sed -n -e '/CONFIG_TIME_/p'		>> $@ < $<
 
 # FAT32 image
 .PHONY: hd32-fat
@@ -120,21 +122,24 @@ hd32-fat.img: BLOCKS=31752
 hd32-fat.img: CYL=63
 hd32-fat.img: TYPE=FAT
 
-hd%.img: $(TOPDIR)/.config Make.image
+hd%.img: hd%.cfg Make.image
 	$(INFO) 'IMG-HD	$@'
-	$(V)echo CONFIG_APPS_2880K=y	> Config
-	$(V)echo CONFIG_IMG_HD=y		>> Config
-	$(V)echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> Config
-	$(V)echo CONFIG_IMG_SECT=63		>> Config
-	$(V)echo CONFIG_IMG_HEAD=16		>> Config
-	$(V)echo CONFIG_IMG_CYL=$(CYL)	>> Config
-	$(V)echo CONFIG_IMG_$(TYPE)=y	>> Config
-	$(V)echo CONFIG_IMG_DEV=y		>> Config
-	$(V)echo CONFIG_IMG_BOOT=y		>> Config
-	$(V)sed -n -e '/CONFIG_TIME_/p'	>> Config < $<
-	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/image/Config" \
+	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
 		NAME=$(subst .img,,$@) DESTDIR=$(DESTDIR)/$(basename $@)
-	$(V)$(RM) Config
+
+hd%.cfg: $(TOPDIR)/.config
+	$(INFO) 'CFG-HD	$@'
+	$(V)cp $< $@
+	$(V)echo CONFIG_APPS_2880K=y		>  $@
+	$(V)echo CONFIG_IMG_HD=y		>> $@
+	$(V)echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> $@
+	$(V)echo CONFIG_IMG_SECT=63		>> $@
+	$(V)echo CONFIG_IMG_HEAD=16		>> $@
+	$(V)echo CONFIG_IMG_CYL=$(CYL)		>> $@
+	$(V)echo CONFIG_IMG_$(TYPE)=y		>> $@
+	$(V)echo CONFIG_IMG_DEV=y		>> $@
+	$(V)echo CONFIG_IMG_BOOT=y		>> $@
+	$(V)sed -n -e '/CONFIG_TIME_/p'		>> $@ < $<
 
 # MBR images
 .PHONY: hd32mbr-minix
