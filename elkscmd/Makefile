@@ -239,6 +239,8 @@ ifdef CONFIG_APP_MAN_PAGES
 INSTALL_TARGETS += $(addprefix $(DESTDIR)/lib/man,$(MAN_SECTIONS))
 endif
 
+INSTALL_TARGETS += $(addprefix install-,$(TAGS))
+
 $(info TAGS	$(TAGS))
 $(info PKGS	$(PKGS))
 $(info DESTDIR	$(DESTDIR))
@@ -291,7 +293,7 @@ $(PROGS): $(TOPDIR)/include/autoconf.h
 # Install selected files.
 
 .PHONY: install
-install: $(INSTALL_TARGETS) $(addprefix install-,$(TAGS))
+install: $(INSTALL_TARGETS)
 
 include elkscmd.mk
 include apps.mk
