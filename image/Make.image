@@ -30,8 +30,6 @@ ifdef CONFIG_IMG_RAW
 TARGETS += raw
 endif
 
-$(info TARGETS	$(TARGETS))
-
 .PHONY: image $(TARGETS)
 
 image: $(TARGETS)
