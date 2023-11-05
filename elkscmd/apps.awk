@@ -86,8 +86,9 @@ END {
     sep = " \\\n";
   }
   print ":";
-  print "\tmkdir -p $(dir $@)"
-  print "\tcp $< $@";
+  print "\t@echo 'INSTALL	$@'"
+  print "\t$(V)mkdir -p $(dir $@)"
+  print "\t$(V)cp $< $@";
 
   sep = "\n";
   for (i in ln) {
@@ -95,8 +96,9 @@ END {
     sep = " \\\n";
   }
   print ":";
-  print "\tmkdir -p $(dir $@)"
-  print "\tln -s $(LINK) $@";
+  print "\t@echo 'LINK	$@'"
+  print "\t$(V)mkdir -p $(dir $@)"
+  print "\t$(V)ln -s $(LINK) $@";
   print "";
 
   create_targets("build", "", tag, tag_build);
