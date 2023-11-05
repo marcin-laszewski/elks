@@ -96,8 +96,8 @@ $(IMAGES_FAT): TYPE=FAT
 
 %.img: %.cfg Make.image
 	$(INFO) 'IMG	$@'
-	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) NAME=$(subst .img,,$@) \
-		DESTDIR=$(DESTDIR)/$(basename $@)
+	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
+		DESTDIR=$(DESTDIR)/$(basename $@) TARGET_FILE=$@
 
 fd%.cfg: $(TOPDIR)/.config
 	$(INFO) 'CFG-FD	$@'

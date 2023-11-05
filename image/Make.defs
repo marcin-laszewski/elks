@@ -123,8 +123,4 @@ ifdef CONFIG_IMG_RAW
 TARGET_FILE =? $(IMG_DIR)/fd.img
 endif
 
-# override default image name if NAME specified
-ifdef NAME
-TARGET_FILE = $(IMG_DIR)/$(NAME).img
-endif
 TARGET_FILE ?= $(IMG_DIR)/image.img
