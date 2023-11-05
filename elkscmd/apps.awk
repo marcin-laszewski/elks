@@ -42,31 +42,25 @@ function basename(path)
         i = 2;
       }
 
-      is_included = 0;
       while (i <= NF) {
         if (substr($i, 1, 1) == ":") {
           t = substr($i, 2);
-          if (t in tag_list) {
-            is_included = 1;
-            if (!(t in tag))
-              tag[t] = 0;
-            tag_build[t, tag[t]] = srcdir file;
-            tag_install[t, tag[t]] = path;
-            tag[t]++
-          }
+          if (!(t in tag))
+            tag[t] = 0;
+          tag_build[t, tag[t]] = srcdir file;
+          tag_install[t, tag[t]] = path;
+          tag[t]++
         }
         i++;
       }
 
-      if (is_included) {
-        if (link == "") {
-          printf "%s:\t%s%s\n", path, srcdir, file;
-          cp[cp_n++] = path;
-        }
-        else {
-          printf "%s:\tLINK=%s\n", path, link;
-          ln[ln_n++] = path;
-        }
+      if (link == "") {
+        printf "%s:\t%s%s\n", path, srcdir, file;
+        cp[cp_n++] = path;
+      }
+      else {
+        printf "%s:\tLINK=%s\n", path, link;
+        ln[ln_n++] = path;
       }
     }
   }
