@@ -299,7 +299,7 @@ include elkscmd.mk
 include apps.mk
 
 apps.mk: Applications $(CONFIG) apps.awk
-	if ! ./apps.awk -v 'srcdir=./' -v 'dstdir=$(DESTDIR)/' -v "tags=$(TAGS)" < $< > $@; \
+	if ! ./apps.awk -v 'srcdir=./' -v 'dstdir=$$(DESTDIR)/' -v "tags=$(TAGS)" < $< > $@; \
 	then \
 		$(RM) $@; \
 		false; \
