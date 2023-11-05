@@ -30,14 +30,16 @@ ifdef CONFIG_IMG_RAW
 TARGETS += raw
 endif
 
-.PHONY: image $(TARGETS)
-
+.PHONY: image
 image: $(TARGETS)
 
+.PHONY: copyminix
 copyminix: minixfs
 
+.PHONY: copyfat
 copyfat: fatfs
 
+.PHONY: copyrom
 copyrom: romfs
 
 # Populate template for filesystem genfs
@@ -78,6 +80,7 @@ endif
 #	Check image integrity
 #	Print filesystem used inode and block count
 
+.PHONY: minixfs
 minixfs: template
 	rm -f $(TARGET_FILE)
 	mfs $(VERBOSE) $(TARGET_FILE) genfs $(MINIX_MKFSOPTS) $(DESTDIR)
@@ -104,6 +107,7 @@ endif
 # all mtools commands require image file
 # -i image	image filename
 
+.PHONY: fatfs
 fatfs: template
 	rm -f $(TARGET_FILE)
 	dd if=/dev/zero of=$(TARGET_FILE) bs=1024 count=$(TARGET_BLKS)
@@ -134,6 +138,7 @@ endif
 
 # Create ROM filesystem from template
 
+.PHONY: romfs
 romfs: template
 	-rm -f romfs.devices
 	$(MAKE) -f Make.devices "MKDEV=echo >> romfs.devices"
@@ -141,6 +146,7 @@ romfs: template
 
 # Create RAW filesystem
 
+.PHONY: raw
 raw: $(ELKS_DIR)/arch/i86/boot/Image
 	dd if=/dev/zero of=$(TARGET_FILE) bs=1024 count=$(TARGET_BLKS)
 	dd if=$(ELKS_DIR)/arch/i86/boot/Image of=$(TARGET_FILE) conv=notrunc
