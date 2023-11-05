@@ -299,7 +299,7 @@ $(PROGS): $(TOPDIR)/include/autoconf.h
 # Install selected files.
 
 .PHONY: install
-install: $(INSTALL_TARGETS)
+install: $(INSTALL_TARGETS) $(addprefix install-,$(TAGS))
 
 include elkscmd.mk
 include apps.mk
