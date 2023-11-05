@@ -38,16 +38,11 @@ IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
 
 all: $(TARGETS)
 
-.PHONY: image
-image:
-	$(INFO) 'MAKE	$@'
-	$(V)$(MAKE) -f Make.image "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
-
 .PHONY: copy
 copy: copyminix
 
-.PHONY: copyminix copyfat copyrom
-copyminix copyfat copyrom:
+.PHONY: copyminix copyfat copyrom image
+copyminix copyfat copyrom image:
 	$(INFO) 'MAKE	$@'
 	$(V)$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
