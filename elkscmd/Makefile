@@ -215,14 +215,6 @@ ifdef CONFIG_SYS_DEFSHELL_SASH
 	TAGS += defsash
 endif
 
-ifdef CONFIG_APP_CGATEXT
-	PKGS += cgatext
-endif
-ifdef CONFIG_APP_ROMPRG
-	PKGS += romprg
-endif
-#PKGS += $(INSTDIRS)
-
 ifdef CONFIG_APP_BUSYELKS
 TARGET += busyelks-links
 endif
@@ -231,11 +223,11 @@ ifdef CONFIG_APP_CGATEXT
 	PKGS += cgatext
 	INSTALL_TARGETS += $(DESTDIR)/usr/bin/cgatext
 endif
+
 ifdef CONFIG_APP_ROMPRG
 	PKGS += romprg
 	INSTALL_TARGETS += $(DESTDIR)/usr/bin/romprg
 endif
-PKGS += $(INSTDIRS)
 
 ifdef CONFIG_APP_BUSYELKS
 TARGET += busyelks-links
