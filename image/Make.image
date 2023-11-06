@@ -15,23 +15,23 @@ TARGETS += $(FD_MINIX_BOOT) $(FD_FAT_BOOT) $(ELKS_DIR)/arch/i86/boot/Image
 endif
 
 ifdef CONFIG_IMG_MINIX
-TARGETS += template minixfs
+TARGETS += minixfs
 endif
 
 ifdef CONFIG_IMG_FAT
-TARGETS += template fatfs
+TARGETS += fatfs
 endif
 
 ifdef CONFIG_IMG_ROM
-TARGETS += template romfs
+TARGETS += romfs
 endif
 
 ifdef CONFIG_IMG_RAW
 TARGETS += raw
 endif
 
-.PHONY: image
-image: $(TARGETS)
+.PHONY: all
+all: $(TARGETS)
 
 .PHONY: copyminix
 copyminix: minixfs
@@ -42,34 +42,7 @@ copyfat: fatfs
 .PHONY: copyrom
 copyrom: romfs
 
-# Populate template for filesystem genfs
-
-.PHONY: template
-template:
-	-rm -rf $(DESTDIR)
-	mkdir -p $(dir $(DESTDIR))
-	cp -a $(TEMPLATE_DIR) $(DESTDIR)
-	-chmod 777 $(DESTDIR)/tmp
-	find $(DESTDIR) -name .keep -delete
-	$(MAKE) -C $(ELKSCMD_DIR) install "CONFIG=$(CONFIG)"
-ifdef CONFIG_APPS_COMPRESS
-	cd $(DESTDIR)/bin && elks-compress * || true
-endif
-	$(MAKE) -C $(BOOTBLOCKS_DIR)
-	bash -c "./ver.pl $(ELKS_DIR)/Makefile-rules > $(DESTDIR)/etc/issue"
-	#git log --abbrev-commit | head -1 | sed 's/commit/ELKS built from commit/' > $(DESTDIR)/etc/motd
-ifdef CONFIG_IMG_BOOT
-	install $(ELKS_DIR)/arch/i86/boot/Image $(DESTDIR)/linux
-endif
-ifdef CONFIG_TIME_TZ
-	echo 'if test "$$TZ" = ""; then export' "TZ=$(CONFIG_TIME_TZ); fi" >> $(DESTDIR)/etc/profile
-endif
-ifdef CONFIG_TIME_RTC_LOCALTIME
-	sed -e 's/clock -s -u/clock -s/' < $(DESTDIR)/etc/rc.sys > tmp
-	mv tmp $(DESTDIR)/etc/rc.sys
-endif
-
-# Create MINIX filesystem from template
+# Create MINIX filesystem from $(DESTDIR)
 
 # Create bootable ELKS MINIX disk image:
 #	Select tagged files into filelist
@@ -81,7 +54,7 @@ endif
 #	Print filesystem used inode and block count
 
 .PHONY: minixfs
-minixfs: template
+minixfs:
 	rm -f $(TARGET_FILE)
 	mfs $(VERBOSE) $(TARGET_FILE) genfs $(MINIX_MKFSOPTS) $(DESTDIR)
 ifdef CONFIG_IMG_DEV
@@ -94,7 +67,7 @@ endif
 	mfsck -fv $(TARGET_FILE)
 	mfs $(TARGET_FILE) stat
 
-# Create FAT filesystem from template
+# Create FAT filesystem from $(DESTDIR)
 
 # Create bootable ELKS MSDOS disk image:
 #	Select tagged files into filelist
@@ -108,7 +81,7 @@ endif
 # -i image	image filename
 
 .PHONY: fatfs
-fatfs: template
+fatfs:
 	rm -f $(TARGET_FILE)
 	dd if=/dev/zero of=$(TARGET_FILE) bs=1024 count=$(TARGET_BLKS)
 	mformat -V
@@ -136,10 +109,10 @@ else
 endif
 endif
 
-# Create ROM filesystem from template
+# Create ROM filesystem from $(DESTDIR)
 
 .PHONY: romfs
-romfs: template
+romfs:
 	-rm -f romfs.devices
 	$(MAKE) -f Make.devices "MKDEV=echo >> romfs.devices"
 	mkromfs -d romfs.devices $(DESTDIR)

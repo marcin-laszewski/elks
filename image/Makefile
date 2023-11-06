@@ -38,11 +38,14 @@ IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
 
 all: $(TARGETS)
 
+.PHONY: image
+image: fd1440.img
+
 .PHONY: copy
 copy: copyminix
 
-.PHONY: copyminix copyfat copyrom image
-copyminix copyfat copyrom image:
+.PHONY: copyminix copyfat copyrom
+copyminix copyfat copyrom:
 	$(INFO) 'MAKE	$@'
 	$(V)$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
 
@@ -94,13 +97,30 @@ fd1440-fat: fd1440-fat.img
 fd2880-fat: fd2880-fat.img
 $(IMAGES_FAT): TYPE=FAT
 
-%.img: %.cfg Make.image
+%.img: %.cfg Make.image $(DESTDIR)/%.ts
 	$(INFO) 'IMG	$@'
-	$(V)$(MAKE) -f Make.image CONFIG=$(abspath $<) \
-		DESTDIR=$(DESTDIR)/$(basename $@) TARGET_FILE=$@
+	$(V)$(MAKE) -f Make.image \
+		CONFIG=$(abspath $<) \
+		DESTDIR=$(DESTDIR)/$(basename $(notdir $@)) \
+		TARGET_FILE=$@
+
+$(DESTDIR)/%.ts: %.fs
+	$(INFO) 'FS	$@'
+	$(V)$(MAKE) -C $(TOPDIR) -f fs.mk \
+		DESTDIR=$(abspath $(basename $@)) CONFIG=$(abspath $<)
 
 fd%.cfg: $(TOPDIR)/.config
 	$(INFO) 'CFG-FD	$@'
+	$(V)cp $< $@
+	$(V)echo CONFIG_APPS_$(fd_size)K=y	>> $@
+	$(V)echo CONFIG_IMG_FD$(fd_size)=y	>> $@
+	$(V)echo CONFIG_IMG_$(TYPE)=y		>> $@
+	$(V)echo CONFIG_IMG_DEV=y		>> $@
+	$(V)echo CONFIG_IMG_BOOT=y		>> $@
+	$(V)sed -n -e '/CONFIG_TIME_/p'		>> $@ < $<
+
+fd%.fs: $(TOPDIR)/.config
+	$(INFO) 'FS-FD	$@'
 	$(V)cp $< $@
 	$(V)echo CONFIG_APPS_$(fd_size)K=y	>> $@
 	$(V)echo CONFIG_IMG_FD$(fd_size)=y	>> $@
@@ -119,6 +139,20 @@ hd32-fat.img: TYPE=FAT
 
 hd%.cfg: $(TOPDIR)/.config
 	$(INFO) 'CFG-HD	$@'
+	$(V)cp $< $@
+	$(V)echo CONFIG_APPS_2880K=y		>  $@
+	$(V)echo CONFIG_IMG_HD=y		>> $@
+	$(V)echo CONFIG_IMG_BLOCKS=$(BLOCKS)	>> $@
+	$(V)echo CONFIG_IMG_SECT=63		>> $@
+	$(V)echo CONFIG_IMG_HEAD=16		>> $@
+	$(V)echo CONFIG_IMG_CYL=$(CYL)		>> $@
+	$(V)echo CONFIG_IMG_$(TYPE)=y		>> $@
+	$(V)echo CONFIG_IMG_DEV=y		>> $@
+	$(V)echo CONFIG_IMG_BOOT=y		>> $@
+	$(V)sed -n -e '/CONFIG_TIME_/p'		>> $@ < $<
+
+hd%.fs: $(TOPDIR)/.config
+	$(INFO) 'FS-HD	$@'
 	$(V)cp $< $@
 	$(V)echo CONFIG_APPS_2880K=y		>  $@
 	$(V)echo CONFIG_IMG_HD=y		>> $@
