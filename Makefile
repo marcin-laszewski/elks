@@ -99,8 +99,8 @@ hd64-minix: image/hd64-minix.img
 image/hd64%.img: TARGET_BLKS=65535
 image/hd64%.img: INODES=32736
 
-image/hd32-minix.img image/hd64-minix.img: CYLS=127
-image/hd32-minix.img image/hd64-minix.img: TYPE=MINIX
+image/hd%-minix.img: CYLS=127
+image/hd%-minix.img: TYPE=MINIX
 
 .PHONY: $(FDS_FAT)
 fd360-fat: image/fd360-fat.img
