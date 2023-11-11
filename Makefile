@@ -27,8 +27,7 @@ BOOTS = \
 
 CONFIG_IMG_BOOT	= y
 
-# Directory for final filesystem to be generated from
-DESTDIR = target
+# target: Directory for final filesystem to be generated from
 
 IMAGE_TARGETS = image/fd1440-minix.img
 
@@ -61,7 +60,7 @@ $(IMAGE_TARGETS): .config include/autoconf.h kernel libc-install
 #.PHONY: copyminix copyfat copyrom
 #copyminix copyfat copyrom:
 #	$(INFO) 'MAKE	$@'
-#	$(V)$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=$(DESTDIR)/$@
+#	$(V)$(MAKE) -f Make.image $@ "CONFIG=$(TOPDIR)/.config" DESTDIR=target/$@
 #
 #.PHONY: compress
 #compress:
@@ -156,7 +155,7 @@ image/hd%.img: FAT_MKFSOPTS=-s $(SECT) -h $(HEAD) -t $(CYLS) -M 512 -d 2 -k -N 0
 # * BPB
 # * FD_MINIX_BOOT
 # * TARGET_BLKS
-image/%-minix.img: $(DESTDIR)/%-minix/.ts $(FD_MINIX_BOOT)
+image/%-minix.img: target/%-minix/.ts $(FD_MINIX_BOOT)
 	$(INFO) 'IMG-MINIX	$@'
 	$(V)$(RM) $@
 	$(V)mfs $(VERBOSE) $@ genfs $(MINIX_MKFSOPTS) -s$(TARGET_BLKS) $(dir $<)
@@ -177,7 +176,7 @@ SETBOOT_OPS =
 
 %/fd1232-fat.img: SETBOOT_OPS = -K
 
-image/%-fat.img: $(DESTDIR)/%-fat/.ts $(FD_FAT_BOOT)
+image/%-fat.img: target/%-fat/.ts $(FD_FAT_BOOT)
 	$(INFO) 'IMG-FAT	$@'
 	$(RM) $@
 	dd if=/dev/zero of=$@ bs=1024 count=$(TARGET_BLKS)
@@ -199,7 +198,7 @@ image/%-fat.img: $(DESTDIR)/%-fat/.ts $(FD_FAT_BOOT)
 
 fd_size = $(subst fd,,$(firstword $(subst -, ,$(lastword $(subst /, ,$(dir $@))))))
 
-$(DESTDIR)/%/.ts: %.fs
+target/%/.ts: %.fs
 	$(INFO) 'FS	$@	$(fd_size)'
 	$(V)$(MAKE) -C $(TOPDIR) -f fs.mk \
 		DESTDIR=$(abspath $(dir $@)) \
@@ -269,7 +268,7 @@ romfs: romfs.device
 romfs.device:
 	$(RM) $@
 	$(MAKE) -f Make.devices "MKDEV=echo >> romfs.devices"
-	mkromfs -d $@ $(DESTDIR)
+	mkromfs -d $@ target
 
 .PHONY: image-clean
 image-clean: image-clean-destdir image-clean-images
@@ -277,7 +276,7 @@ image-clean: image-clean-destdir image-clean-images
 .PHONY: image-clean-destdir
 image-clean-destdir:
 	$(INFO) 'IMG-CLEAN	$@'
-	$(V)$(RM) -r $(DESTDIR)
+	$(V)$(RM) -r target
 
 .PHONY: image-clean-images
 image-clean-images:
