@@ -4,3 +4,5 @@
 
 # Temporary files
 romfs.devices
+
+*.fs
