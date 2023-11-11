@@ -107,7 +107,7 @@ fd360-%.img: MINIX_MKFSOPTS = -1 -n14
 
 fd360-%.img: TARGET_BLKS = 360
 fd360-%.img: BPB = -B9,2,40
-fd360-%.img: MINIX_MKFSOPTS += -i128
+fd360-%.img: MINIX_MKFSOPTS += -i198
 fd360-%.img: CONFIG_IMG_BOOT = n
 
 fd720-%.img: TARGET_BLKS = 720
