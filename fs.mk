@@ -23,7 +23,7 @@ ELKSCMD		?= $(ROOT)/elkscmd
 IMAGE		?= $(ROOT)/image
 TEMPLATE	?= $(ELKSCMD)/rootfs_template
 
-ifdef CONFIG_IMG_BOOT
+ifeq "$(CONFIG_IMG_BOOT)" "y"
 TARGETS += $(DESTDIR)/linux
 endif
 
