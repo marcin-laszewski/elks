@@ -16,11 +16,15 @@ LIB86	= elks/arch/i86/lib/lib86.a
 -include .config
 
 # MBR boot sector
-HD_MBR_BOOT = bootblocks/mbr.bin
+FD_FAT_BOOT	= bootblocks/fat.bin
+FD_MINIX_BOOT	= bootblocks/minix.bin
+HD_MBR_BOOT	= bootblocks/mbr.bin
 
-BOOTBLOCKS_DIR	= bootblocks
-FD_MINIX_BOOT	= $(BOOTBLOCKS_DIR)/minix.bin
-FD_FAT_BOOT	= $(BOOTBLOCKS_DIR)/fat.bin
+BOOTS = \
+ $(HD_MBR_BOOT) \
+ $(FD_MINIX_BOOT) \
+ $(FD_FAT_BOOT) \
+
 CONFIG_IMG_BOOT	= y
 
 # Directory for final filesystem to be generated from
@@ -48,7 +52,7 @@ ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
 
-$(IMAGE_TARGETS): .config include/autoconf.h kernel boot libc-install
+$(IMAGE_TARGETS): .config include/autoconf.h kernel libc-install
 
 #.PHONY: copy
 #copy: copyminix
@@ -152,7 +156,7 @@ image/hd%.img: FAT_MKFSOPTS=-s $(SECT) -h $(HEAD) -t $(CYLS) -M 512 -d 2 -k -N 0
 # * BPB
 # * FD_MINIX_BOOT
 # * TARGET_BLKS
-image/%-minix.img: $(DESTDIR)/%-minix/.ts
+image/%-minix.img: $(DESTDIR)/%-minix/.ts $(FD_MINIX_BOOT)
 	$(INFO) 'IMG-MINIX	$@'
 	$(V)$(RM) $@
 	$(V)mfs $(VERBOSE) $@ genfs $(MINIX_MKFSOPTS) -s$(TARGET_BLKS) $(dir $<)
@@ -173,7 +177,7 @@ SETBOOT_OPS =
 
 %/fd1232-fat.img: SETBOOT_OPS = -K
 
-image/%-fat.img: $(DESTDIR)/%-fat/.ts
+image/%-fat.img: $(DESTDIR)/%-fat/.ts $(FD_FAT_BOOT)
 	$(INFO) 'IMG-FAT	$@'
 	$(RM) $@
 	dd if=/dev/zero of=$@ bs=1024 count=$(TARGET_BLKS)
@@ -243,11 +247,11 @@ image/hd32mbr-fat.img: SETBOOT_OPS += -Sf
 
 image/hd32mbr-minix.img \
 image/hd32mbr-fat.img \
-:
+: $(HD_MBR_BOOT)
 	$(INFO) 'IMG-MBR	$@'
 	$(V)if ! dd if=/dev/zero of=$@ bs=512 count=63; then $(RM) $@; false; fi
 	$(V)if ! cat $< >> $@; then $(RM) $@; false; fi
-	$(V)if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $(HD_MBR_BOOT); then $(RM) $@; false; fi
+	$(V)if ! setboot $@ -P63,16,63 $(SETBOOT_OPS) $<; then $(RM) $@; false; fi
 
 #--- rawfs
 .PHONY: raw
@@ -295,8 +299,16 @@ kclean:
 	$(MAKE) -C elks kclean
 
 .PHONY: boot
-boot: .config include/autoconf.h
-	$(MAKE) -C bootblocks all
+boot: $(BOOTS)
+
+$(BOOTS): .config include/autoconf.h
+	@echo 'BOOT	$@'
+	$(V)$(MAKE) -C $(dir $@) $(notdir $@)
+
+.PHONY: boot-clean
+boot-clean:
+	@echo 'BOOT-CLEAN'
+	$(V)$(MAKE) -C bootblocks clean
 
 .PHONY: elkscmd
 elkscmd: .config include/autoconf.h libc-install $(LIB86)
@@ -314,9 +326,8 @@ tools-elf2elks:
 $(LIB86):
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
-clean: libc-clean libc-uninstall image-clean
+clean: libc-clean libc-uninstall image-clean boot-clean
 	$(MAKE) -C elks clean
-	$(MAKE) -C bootblocks clean
 	$(MAKE) -C elkscmd clean
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu clean

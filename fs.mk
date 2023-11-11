@@ -17,7 +17,6 @@ include $(CONFIG)
 endif
 
 ROOT		?= .
-BOOTBLOCKS	?= $(ROOT)/bootblocks
 ELKSKERNEL	?= $(ROOT)/elks
 ELKSCMD		?= $(ROOT)/elkscmd
 IMAGE		?= $(ROOT)/image
@@ -40,7 +39,6 @@ MODE	= 775
 .PHONY: all
 all: \
  elkscmd \
- bootblocks \
  $(DESTDIR)/etc/issue \
  $(DESTDIR)/etc/motd \
  $(TARGETS)
@@ -59,11 +57,6 @@ template: | $(DESTDIR)/tmp
 	$(INFO) 'TEMPLATE	$(TEMPLATE)'
 	$(V)cp -a $(TEMPLATE)/. $(DESTDIR)
 	$(V)find $(DESTDIR) -name .keep -delete
-
-.PHONY: bootblocks
-bootblocks: | $(DESTDIR)/tmp
-	$(INFO) 'MAKE	$(BOOTBLOCKS)'
-	$(V)$(MAKE) -C $(BOOTBLOCKS)
 
 $(DESTDIR)/etc/issue: | $(DESTDIR)/etc
 	$(INFO) 'CREATE	$@'
