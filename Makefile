@@ -43,7 +43,7 @@ FDS_MINIX	= $(addsuffix -minix,$(FDS))
 IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
 
 ifdef CONFIG_IMG_EXTRA_IMAGES
-	IMAGES += $(filter-out $(IMAGE_DEFAULT),$(IMAGES_FAT) $(IMAGES_MINIX))
+	IMAGES += $(filter-out %/fd360-fat.img,$(filter-out $(IMAGE_DEFAULT),$(IMAGES_FAT) $(IMAGES_MINIX)))
 endif
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
