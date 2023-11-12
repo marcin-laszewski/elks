@@ -29,10 +29,10 @@ CONFIG_IMG_BOOT	= y
 
 # target: Directory for final filesystem to be generated from
 
-IMAGE_TARGETS = image/fd1440-minix.img
+IMAGES = image/fd1440-minix.img
 
 ifdef CONFIG_IMG_EXTRA_IMAGES
-IMAGE_TARGETS += images
+IMAGES += images
 endif
 
 FD_SIZES 	= 360 720 1200 1440 2880
@@ -46,12 +46,12 @@ IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
 
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: $(IMAGE_TARGETS)
+all: $(IMAGES)
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
 
-$(IMAGE_TARGETS): .config include/autoconf.h kernel libc-install
+$(IMAGES): .config include/autoconf.h kernel libc-install
 
 #.PHONY: copy
 #copy: copyminix
