@@ -29,11 +29,9 @@ CONFIG_IMG_BOOT	= y
 
 # target: Directory for final filesystem to be generated from
 
-IMAGES = image/fd1440-minix.img
+IMAGE_DEFAULT = image/fd1440-minix.img
 
-ifdef CONFIG_IMG_EXTRA_IMAGES
-IMAGES += images
-endif
+IMAGES = $(IMAGE_DEFAULT)
 
 FD_SIZES 	= 360 720 1200 1440 2880
 FDS		= $(addprefix image/fd,$(FD_SIZES))
@@ -44,9 +42,16 @@ IMAGES_FAT	= $(addsuffix .img,$(FDS_FAT) hd32-fat hd32mbr-fat)
 FDS_MINIX	= $(addsuffix -minix,$(FDS))
 IMAGES_MINIX	= $(addsuffix .img,$(FDS_MINIX))
 
+ifdef CONFIG_IMG_EXTRA_IMAGES
+	IMAGES += $(filter-out $(IMAGE_DEFAULT),$(IMAGES_FAT) $(IMAGES_MINIX))
+endif
+
 .PHONY: all clean libc kconfig defconfig config menuconfig
 
-all: $(IMAGES)
+all: images
+
+.PHONY: images
+images: $(IMAGES)
 ifneq ($(shell uname), Darwin)
 	$(MAKE) -C elksemu PREFIX='$(TOPDIR)/cross' elksemu
 endif
