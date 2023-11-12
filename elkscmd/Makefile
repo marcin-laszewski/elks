@@ -6,6 +6,8 @@ ifndef V
 	V = @
 endif
 
+INFO = @echo
+
 # Include standard rules.
 
 BASEDIR = .
@@ -253,6 +255,12 @@ $(info INSTALL_TARGETS	$(INSTALL_TARGETS))
 
 include $(BASEDIR)/Make.rules
 
+ifdef CONFIG_APPS_COMPRESS
+	EXT = .cmr
+else
+	EXT =
+endif
+
 .PHONY: all
 all: $(TAGS) $(PROGS)
 
@@ -303,6 +311,15 @@ apps.mk: Applications $(CONFIG) apps.awk
 	then \
 		$(RM) $@; \
 		false; \
+	fi
+
+%.cmr: %
+	$(INFO) 'COMPRESS	$@	$<'
+	$(V)$(RM) $@
+	$(V)if ! elks-compress -o $@ $< || ! test -f $@; \
+	then \
+		$(INFO) 'LN $< $@'; \
+		ln -s -r $< $@; \
 	fi
 
 .PHONY: busyelks-links

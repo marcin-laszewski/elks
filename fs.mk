@@ -47,10 +47,6 @@ all: \
 elkscmd: template
 	$(INFO) 'MAKE	$(ELKSCMD)'
 	$(V)$(MAKE) -C $(ELKSCMD) install "CONFIG=$(abspath $(CONFIG))"
-ifdef CONFIG_APPS_COMPRESS
-	$(INFO) 'COMPRESS	$(DESTDIR)/bin'
-	$(V)cd $(DESTDIR)/bin && elks-compress * || true
-endif
 
 .PHONY: template
 template: | $(DESTDIR)/tmp

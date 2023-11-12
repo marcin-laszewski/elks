@@ -55,7 +55,7 @@ function basename(path)
       }
 
       if (link == "") {
-        printf "%s:\t%s%s\n", path, srcdir, file;
+        printf "%s:\t%s%s$(EXT)\n", path, srcdir, file;
         cp[cp_n++] = path;
       }
       else {
