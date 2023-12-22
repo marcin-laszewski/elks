@@ -22,6 +22,8 @@ ELKSCMD		?= $(ROOT)/elkscmd
 IMAGE		?= $(ROOT)/image
 TEMPLATE	?= $(ELKSCMD)/rootfs_template
 
+ELKSIMG	?= $(ELKSKERNEL)/arch/i86/boot/Image
+
 ifeq "$(CONFIG_IMG_BOOT)" "y"
 TARGETS += $(DESTDIR)/linux
 endif
@@ -74,7 +76,7 @@ $(DESTDIR)/etc/motd: | $(DESTDIR)/etc
 	fi
 
 $(DESTDIR)/linux: | $(DESTDIR)
-$(DESTDIR)/linux: $(ELKSKERNEL)/arch/i86/boot/Image
+$(DESTDIR)/linux: $(ELKSIMG)
 	$(INFO) 'INSTALL	$@'
 	$(V)install $< $@
 
