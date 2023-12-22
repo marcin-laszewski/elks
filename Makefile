@@ -10,7 +10,9 @@ endif
 
 include $(TOPDIR)/Make.defs
 
-LIB86	= elks/arch/i86/lib/lib86.a
+ARCH86	= elks/arch/i86/
+LIB86	= $(ARCH86)/lib/lib86.a
+ELKSIMG	= $(ARCH86)/boot/Image
 
 # for CONFIG_IMG_EXTRA_IMAGES
 -include .config
@@ -296,8 +298,10 @@ image-clean-images:
 		image/hd32mbr-minix.img \
 
 .PHONY: kernel
-kernel: .config include/autoconf.h
-	$(MAKE) -C elks all
+kernel: $(ELKSIMG)
+$(ELKSIMG): .config include/autoconf.h
+	@echo 'ELKSIMG	$@'
+	$(V)$(MAKE) -C elks all
 
 kclean:
 	$(MAKE) -C elks kclean
