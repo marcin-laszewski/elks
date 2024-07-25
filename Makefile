@@ -10,7 +10,6 @@ endif
 
 include $(TOPDIR)/Make.defs
 
-<<<<<<< HEAD
 ARCH86	= elks/arch/i86/
 LIB86	= $(ARCH86)/lib/lib86.a
 ELKSIMG	= $(ARCH86)/boot/Image
