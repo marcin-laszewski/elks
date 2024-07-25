@@ -28,8 +28,8 @@
 
 #define ISODD(x) ((x) & 1)
 
-#define REV     "\e[7m"
-#define OFF     "\e[0m"
+#define REV     "\033[7m"
+#define OFF     "\033[0m"
 #define SP      OFF " " REV
 #define HELP    REV \
     "Z quit" SP "C cd" SP "D dir first" SP "S size sort" SP "T time sort" SP \
@@ -577,8 +577,11 @@ printent(struct entry *ent, int active)
 
 	attron(attr);
 	name[NAME_COLS] = '\0';
-	printw("%s%*s %9lu  %s", active ? CURSR : EMPTY, -NAME_COLS, name, ent->size,
-        timestring(ent->t));
+	printw("%s%*s ", active ? CURSR : EMPTY, -NAME_COLS, name);
+	if (S_ISBLK(ent->mode) || S_ISCHR(ent->mode))
+		printw("%3u, %3u", ent->size >> 8, ent->size & 0xff);
+	else printw("%9lu", ent->size);
+	printw(" %s", timestring(ent->t));
 	attroff(attr);
 	clrnl();
 }
@@ -611,9 +614,10 @@ dentfill(char *path, struct entry **dents,
 		r = lstat(newpath, &sb);
 		if (r == -1)
 			fatal("lstat");
-		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
-		(*dents)[n].size = sb.st_size;
+		(*dents)[n].mode = sb.st_mode;
+		r = S_ISBLK(sb.st_mode) || S_ISCHR(sb.st_mode);
+		(*dents)[n].size = r? sb.st_rdev: sb.st_size;
 		n++;
 	}
 
@@ -746,7 +750,7 @@ begin:
 	for (;;) {
 		redraw(path);
         if (once) {
-            info("\e[7m? for help\e[0m");
+            info("\033[7m? for help\033[0m");
             once = 0;
         }
 nochange:
@@ -848,8 +852,14 @@ nochange:
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
-        case 'a' ... 'z':
-        case '0' ... '9':
+        case 'a': case 'b': case 'c': case 'd': case 'e':
+        case 'f': case 'g': case 'h': case 'i': case 'j':
+        case 'k': case 'l': case 'm': case 'n': case 'o':
+        case 'p': case 'q': case 'r': case 's': case 't':
+        case 'u': case 'v': case 'w': case 'x': case 'y':
+        case 'z':
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
             for (r = 0; r < ndents; r++) {
                 if (++cur >= ndents)
                     cur = 0;
@@ -993,8 +1003,6 @@ main(int argc, char *argv[])
 			ipath = "/";
 	}
 
-	signal(SIGINT, SIG_IGN);
-
 	/* Test initial path */
 	if (canopendir(ipath) == 0) {
 		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
@@ -1006,6 +1014,7 @@ main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 #endif
 	initcurses();
+	signal(SIGINT, SIG_IGN);
 	browse(ipath, ifilter);
 	exitcurses();
 	exit(0);

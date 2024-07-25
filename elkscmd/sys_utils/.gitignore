@@ -1,8 +1,11 @@
+beep
 chmem
 clock
 console
+decomp
 exitemu
 getty
+hostdecomp
 init
 kill
 knl
@@ -19,6 +22,7 @@ ps
 reboot
 sercat
 shutdown
+sysctl
 umount
 unreal16
 who

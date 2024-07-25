@@ -1,8 +1,9 @@
 # Makefile of /libc/misc module
 
-include $(TOPDIR)/libc/Makefile.inc
+COMPILER ?= ia16
+LIB ?= out.a
 
-LIB = out.a
+include $(TOPDIR)/libc/$(COMPILER).inc
 
 OBJS = \
 	aliases.o \
@@ -11,6 +12,7 @@ OBJS = \
 	atoi.o \
 	atol.o \
 	basename.o \
+	bsr.o \
 	crypt.o \
 	devname.o \
 	dirname.o \
@@ -35,18 +37,17 @@ OBJS = \
 	system.o \
 	tmpnam.o \
 	uitoa.o \
+	ultoa.o \
 	ultostr.o \
 	ulltostr.o \
 	wildcard.o \
 	# end of list
 
-OBJS += instrument.o
-
 all: $(LIB)
 
-$(LIB): $(OBJS)
+$(LIB): $(LIBOBJS)
 	$(RM) $@
-	$(AR) $(ARFLAGS_SUB) $@ $^
+	$(AR) $(ARFLAGS_SUB) $@ $(LIBOBJS)
 
 clean:
 	$(RM) *.[aod]

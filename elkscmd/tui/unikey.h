@@ -11,7 +11,8 @@ enum ttyflags {
     CatchISig = 4,                  /* catch SIGINT and exit by default */
     Utf8 = 8,                       /* set termios IUTF8 */
     ExitLastLine = 16,              /* on exit, cursor position to bottom */
-    FullBuffer                      /* fully buffered output */
+    NoWait = 32,                    /* don't hang in getch */
+    FullBuffer = 64                 /* fully buffered output */
 };
 
 /* tty.c - tty termios and mouse management */
@@ -22,6 +23,7 @@ void tty_fullbuffer(void);
 void tty_linebuffer(void);
 int tty_getsize(int *cols, int *rows);
 extern int iselksconsole;
+extern int _tty_flags;
 
 /* tty-cp437.c - display cp437 characters */
 char *tty_allocate_screen(int cols, int lines);
@@ -50,16 +52,12 @@ int stream_to_rune(unsigned int ch);
 /* Reads single keystroke or control sequence from character device */
 int readansi(int fd, char *p, int n);
 
+#ifdef __GNUC__
 #define bsr(x)  ((x)? (__builtin_clz(x) ^ ((sizeof(int) * 8) -1)): 0)
-#if 0
-int bsr(int n)
-{
-    if (n == 0) return 0;   /* avoid incorrect result of 31 returned! */
-    return (__builtin_clz(n) ^ ((sizeof(int) * 8) - 1));
-}
+#else
+#define __builtin_unreachable()
 #endif
 
-/* defines from Cosmopolitan - see copyright in unikey.c */
 #define ThomPikeCont(x)     (0200 == (0300 & (x)))
 #define ThomPikeByte(x)     ((x) & (((1 << ThomPikeMsb(x)) - 1) | 3))
 #define ThomPikeLen(x)      (7 - ThomPikeMsb(x))

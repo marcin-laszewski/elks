@@ -15,6 +15,8 @@
 #include <linuxmt/mm.h>
 #include <linuxmt/stat.h>
 #include <linuxmt/fcntl.h>
+
+#include <arch/irq.h>
 #include "af_nano.h"
 
 #ifdef CONFIG_NANO
@@ -194,7 +196,6 @@ static int nano_connect(register struct socket *sock,
 	return -EISCONN;*/	/*Already checked in socket.c*/
 
     if (get_user(&(((struct sockaddr_na *)uservaddr)->sun_family)) != AF_NANO) {
-	printk("ADR - {%d}\n", sockna.sun_family);
 	return -EINVAL;
     }
 

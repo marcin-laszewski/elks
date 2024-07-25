@@ -19,6 +19,8 @@ int LINES = 25;
 int COLS = 80;
 void *stdscr;
 
+//static int xoff, yoff;
+
 void *initscr()
 {
     tty_init(MouseTracking|CatchISig|FullBuffer);
@@ -38,44 +40,12 @@ int has_colors()
     return 1;
 }
 
-void cbreak()
-{
-}
-
-void noecho()
-{
-}
-
-void nonl()
-{
-}
-
-void intrflush(void *win, int bf)
-{
-}
-
-void keypad(void *win, int bf)
-{
-}
-
-void echo()
-{
-}
-
-void timeout(int t)
-{
-}
-
-void leaveok(void *win, int flag)
-{
-}
-
 void nodelay(void *win, int flag)
 {
-}
-
-void scrollok(void *win, int flag)
-{
+    if (flag) {
+        _tty_flags |= NoWait;
+        tty_enable_unikey();
+    }
 }
 
 void refresh()
@@ -96,40 +66,42 @@ int addch(int ch)
 
 int mvaddch(int y, int x, int ch)
 {
-    printf("\e[%d;%dH%c", y+1, x+1, ch);
+    printf("\033[%d;%dH%c", y+1, x+1, ch);
     return OK;
 }
 
 /* cursor on/off */
 void curs_set(int visibility)
 {
-    printf("\e[?25%c", visibility? 'h': 'l');
+    printf("\033[?25%c", visibility? 'h': 'l');
 }
 
 /* clear screen */
 void erase()
 {
-    printf("\e[H\e[2J");
+    printf("\033[H\033[2J");
 }
 
 void move(int y, int x)
 {
-    printf("\e[%d;%dH", y+1, x+1);
+    //y += yoff;
+    //x += xoff;
+    printf("\033[%d;%dH", y+1, x+1);
 }
 
 void clrnl(void)
 {
-    printf("\e[0K\n");
+    printf("\033[0K\n");
 }
 
 void clrtoeos(void)
 {
-    printf("\e[0J");
+    printf("\033[0J");
 }
 
 void clrtoeol(void)
 {
-    printf("\e[0K");
+    printf("\033[0K");
 }
 
 void printw(char *fmt, ...)

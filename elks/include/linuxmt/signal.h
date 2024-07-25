@@ -10,14 +10,13 @@
  * mask by losing all these unused signals.
  */
 #include <linuxmt/types.h>
+#include <arch/cdefs.h>
 
 #define __SMALLSIG		/* 16-bit sigset_t*/
 
 #ifdef __SMALLSIG
 
 typedef unsigned short sigset_t;	/* at least 16 bits */
-
-/*@-namechecks@*/
 
 #define SIGHUP		 1
 #define SIGINT		 2
@@ -40,13 +39,9 @@ typedef unsigned short sigset_t;	/* at least 16 bits */
 
 #define _NSIG		16
 
-/*@+namechecks@*/
-
 #else
 
 typedef unsigned long sigset_t;	/* at least 32 bits */
-
-/*@-namechecks@*/
 
 #define SIGHUP		 1
 #define SIGINT		 2
@@ -83,8 +78,6 @@ typedef unsigned long sigset_t;	/* at least 32 bits */
 #define	SIGUNUSED	31
 
 #define _NSIG		32
-
-/*@+naamechecks@*/
 
 #endif
 
@@ -178,8 +171,6 @@ typedef unsigned long sigset_t;	/* at least 32 bits */
 
 #endif /* __KERNEL__*/
 
-/*@-namechecks@*/
-
 #define SIG_BLOCK          0	/* for blocking signals */
 #define SIG_UNBLOCK        1	/* for unblocking signals */
 #define SIG_SETMASK        2	/* for setting the signal mask */
@@ -189,12 +180,16 @@ typedef void (*sighandler_t)(int);
 /* Type of a signal handler which interfaces with the kernel.  This is always
    a far function that uses the `stdcall' calling convention, even for a
    user program that is being compiled for a different calling convention.  */
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-typedef __attribute__((__stdcall__)) __far void (*__kern_sighandler_t)(int);
+typedef stdcall __far void (*__kern_sighandler_t)(int);
 #pragma GCC diagnostic pop
+#endif
 
-/*@+namechecks@*/ /*@ignore@*/
+#ifdef __WATCOMC__
+typedef void stdcall (__far *__kern_sighandler_t)(int);
+#endif
 
 /*
  * Because this stuff can get pretty confusing:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This build script is called in main.yml by GitHub Continuous Integration
 # Full build (including the cross tool chain)
@@ -35,6 +35,9 @@ fi
 if [ "$1" = "auto" ]; then
 	echo "Invoking 'make defconfig'..."
 	make defconfig || clean_exit 2
+	echo "Building IBM PC image..."
+	#cp ibmpc-1440.config .config
+	cp ibmpc-1440-nc.config .config
 else
 	echo
 	echo "Now invoking 'make menuconfig' for you to configure the system."
@@ -82,9 +85,11 @@ if [ "$1" = "auto" ]; then
     echo "Building PC-98 image..."
     cp pc98-1232.config .config
     make kclean || clean_exit 9
+    rm bootblocks/*.o
     rm elkscmd/sys_utils/clock.o
     rm elkscmd/sys_utils/ps.o
     rm elkscmd/sys_utils/meminfo.o
+    rm elkscmd/sys_utils/beep.o
     rm elkscmd/basic/*.o
     rm elkscmd/nano-X/*/*.o
     make -j1 || clean_exit 10

@@ -21,11 +21,11 @@
  * -RDB
  */
 
-#include <sys/types.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
-#include "_stdio.h"
+#include <sys/types.h>
 
 #ifndef __HAS_NO_FLOATS__
 #include <sys/weaken.h>
@@ -204,7 +204,7 @@ vfprintf(FILE *op, const char *fmt, va_list ap)
 	 case 'p':		/* Pointer */
 	    lval = (sizeof(char*) == sizeof(long));
 	    pad = '0';
-	    width = 6;
+	    width = 4;
 	    preci = 8;
 	    /* fall thru */
 

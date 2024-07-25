@@ -4,9 +4,7 @@
  *  Written 1992 by Werner Almesberger
  */
 
-#include <features.h>
-#include <arch/segment.h>
-
+#include <linuxmt/config.h>
 #include <linuxmt/sched.h>
 #include <linuxmt/msdos_fs.h>
 #include <linuxmt/kernel.h>
@@ -15,6 +13,8 @@
 #include <linuxmt/stat.h>
 #include <linuxmt/mm.h>
 #include <linuxmt/debug.h>
+
+#include <arch/segment.h>
 
 unsigned char FATPROC get_fs_byte(const void *dv)
 {
@@ -200,7 +200,7 @@ static int FATPROC msdos_create_entry(struct inode *dir,const char *name,int is_
 }
 
 
-int msdos_create(register struct inode *dir,const char *name,int len,int mode,
+int msdos_create(register struct inode *dir,const char *name,size_t len,mode_t mode,
 	struct inode **result)
 {
 	struct buffer_head *bh;
@@ -228,7 +228,7 @@ int msdos_create(register struct inode *dir,const char *name,int len,int mode,
 }
 
 
-int msdos_mkdir(struct inode *dir,const char *name,int len,int mode)
+int msdos_mkdir(struct inode *dir,const const char *name,size_t len,mode_t mode)
 {
 	struct buffer_head *bh;
 	struct msdos_dir_entry *de;
@@ -366,9 +366,9 @@ int msdos_unlink(register struct inode *dir,const char *name,int len)
 	mark_buffer_dirty(bh);
 unlink_done:
 	unmap_brelse(bh);
-	if (inode) debug_fat("unlink iput inode %u dirt %d count %d\n",
-		inode->i_ino, inode->i_dirt, inode->i_count);
-	if (dir) debug_fat("unlink iput dir %u dirt %d count %d\n", dir->i_ino, dir->i_dirt, dir->i_count);
+	if (inode) debug_fat("unlink iput inode %lu dirt %d count %d\n",
+		(unsigned long)inode->i_ino, inode->i_dirt, inode->i_count);
+	if (dir) debug_fat("unlink iput dir %lu dirt %d count %d\n", (unsigned long)dir->i_ino, dir->i_dirt, dir->i_count);
 	iput(inode);
 	iput(dir);
 	return res;

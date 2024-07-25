@@ -22,6 +22,8 @@
 
 #define POLL_MAX        6       /* Maximum number of polled queues per process */
 
+#define MAX_SEGS        5       /* Maximum number of application code/data segments */
+
 /* buffers */
 #define NR_MAPBUFS      8       /* Number of internal L1 buffers */
 
@@ -45,4 +47,4 @@
 
 #define MAX_PACKET_ETH 1536     /* Max packet size, 6 blocks of 256 bytes */
 
-#endif /* !__LINUXMT_LIMITS_H */
+#endif

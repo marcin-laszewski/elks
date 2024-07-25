@@ -1,8 +1,11 @@
 crt0.o
 libc.a
+libc.lst
 build-ml/
 asm.mk
 h.mk
 libc.mk
 o.mk
 syscall.mk
+*.obj
+*.lib

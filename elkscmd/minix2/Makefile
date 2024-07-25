@@ -17,7 +17,7 @@ INSTDIR	?= $(DESTDIR)/bin
 
 # TODO: lpd man mt install	# Do not compile.
 # compiling but unused: pwdauth
-PRGS=env lp remsync synctree tget
+PRGS=env lp lpd remsync synctree tget
 
 env lp: OBJS += $(TINYPRINTF)
 
@@ -29,6 +29,9 @@ all: $(PRGS)
 %: %.o
 	@echo 'LD	$@'
 	$(V)$(LD) $(LDFLAGS) -o $@ $< $(OBJS) $(LDLIBS)
+
+install: $(PRGS)
+	$(INSTALL) $(PRGS) $(DESTDIR)/bin
 
 .PHONY: install
 install: $(addprefix $(INSTDIR)/,$(PRGS))

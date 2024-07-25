@@ -36,13 +36,21 @@ PRGS = \
 	chmem \
 	clock \
 	unreal16 \
+	beep \
 	mouse \
 	sercat \
 	console \
 	makeboot \
+	decomp \
+	sysctl \
 	#knl \
+	# EOL
 
 PRGS_OBJ = $(addsuffix .o,$(PRGS))
+
+HOSTPRGS = hostdecomp
+HOSTCFLAGS += -I$(TOPDIR)/elks/include
+EXODECR_C = $(TOPDIR)/elks/fs/exodecr.c
 
 all: $(PRGS)
 
@@ -52,6 +60,8 @@ getty:		LDFLAGS += -maout-heap=1024	-maout-stack=1024
 login:		LDFLAGS += -maout-stack=2048
 meminfo:	LDFLAGS += -maout-heap=1	-maout-stack=512
 ps:		LDFLAGS += -maout-heap=1024	-maout-stack=2048
+
+host: $(HOSTPRGS)
 
 chmem getty makeboot meminfo mount mouse ps: $(TINYPRINTF)
 
@@ -72,11 +82,23 @@ makeboot.o: ../../bootblocks/mbr_autogen.c
 unreal.o: $(ELKS_LIB)/unreal.S
 	$(LD) -melks-libc -mcmodel=small -c $< -o $@
 
+beep: beep.o
+	$(LD) $(LDFLAGS) -o beep beep.o $(LDLIBS)
+
+sysctl: sysctl.o
+	$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
 unreal16: unreal16.o unreal.o
 	$(LD) -melks-libc -mcmodel=small -nostdlib -o unreal16 unreal16.o unreal.o
 
 unreal16.o: unreal16.S
 	$(LD) -melks-libc -mcmodel=small -c $< -o $@
+
+decomp: decomp.o $(EXODECR_C) $(TINYPRINTF)
+	$(LD) $(LDFLAGS) -maout-heap=0xffff -o $@ $^ $(LDLIBS)
+
+hostdecomp: decomp.c $(EXODECR_C)
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ $^
 
 .PHONY: all
 all: $(PRGS)
@@ -93,4 +115,4 @@ $(DESTDIR)/bin/%: %
 
 .PHONY: clean
 clean:
-	$(RM) $(PRGS_OBJ) unreal.o core $(PRGS)
+	$(RM) $(PRGS_OBJ) unreal.o core $(PRGS) $(HOSTPROGS)

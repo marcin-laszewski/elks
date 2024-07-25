@@ -1,10 +1,9 @@
 /* 
- * Written by Gregory Haerr for the ELKS project, published
- * under the GNU Library General Public License.
+ * Written by Gregory Haerr for the ELKS project.
  */
 #include <string.h>
 #include <unistd.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <errno.h>
 
 /* macro for matching environment name in string*/

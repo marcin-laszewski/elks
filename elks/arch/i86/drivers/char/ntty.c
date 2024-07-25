@@ -12,7 +12,6 @@
  * VFS interface to the character drivers (what a mouthful! :)  
  */
 
-#include <linuxmt/types.h>
 #include <linuxmt/config.h>
 #include <linuxmt/sched.h>
 #include <linuxmt/fs.h>
@@ -28,6 +27,7 @@
 #include <linuxmt/init.h>
 #include <linuxmt/debug.h>
 #include <linuxmt/heap.h>
+#include <arch/irq.h>
 
 /* default termios, set at init time, not reset at open*/
 struct termios def_vals = {
@@ -91,7 +91,6 @@ struct tty *determine_tty(dev_t dev)
 {
     register struct tty *ttyp = &ttys[0];
     unsigned short minor = MINOR(dev);
-    extern dev_t dev_console;
 
     /* handle /dev/tty*/
     if (minor == 255 && current->pgrp && (current->pgrp == ttyp->pgrp))
@@ -145,8 +144,7 @@ void tty_freeq(struct tty *tty)
 
 int tty_open(struct inode *inode, struct file *file)
 {
-    register struct tty *otty;
-    register __ptask currentp = current;
+    struct tty *otty;
     int err;
 
     if (!(otty = determine_tty(inode->i_rdev)))
@@ -166,11 +164,11 @@ int tty_open(struct inode *inode, struct file *file)
 
     err = otty->ops->open(otty);
     if (!err) {
-        if (!(file->f_flags & O_NOCTTY) && currentp->session == currentp->pid
-                && currentp->tty == NULL && otty->pgrp == 0) {
-            debug_tty("TTY setting pgrp %d pid %P\n", currentp->pgrp);
-            otty->pgrp = currentp->pgrp;
-            currentp->tty = otty;
+        if (!(file->f_flags & O_NOCTTY) && current->session == current->pid
+                && current->tty == NULL && otty->pgrp == 0) {
+            debug_tty("TTY setting pgrp %d pid %P\n", current->pgrp);
+            otty->pgrp = current->pgrp;
+            current->tty = otty;
         }
         otty->flags |= TTY_OPEN;
     }
@@ -433,9 +431,6 @@ int tty_select(struct inode *inode, struct file *file, int sel_type)
         ret = (tty->outq.len != tty->outq.size);
         if (!ret)
             select_wait(&tty->outq.wait);
-            /*@fallthrough@*/
-/*      case SEL_EX: */
-/*      break; */
     }
     return ret;
 }
@@ -449,8 +444,6 @@ int wait_for_keypress(void)
     set_irq();
     return chq_wait_rd(&ttys[0].inq, 0);
 }
-
-/*@-type@*/
 
 static struct file_operations tty_fops = {
     pipe_lseek,                 /* Same behavoir, return -ESPIPE */

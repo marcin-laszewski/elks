@@ -77,6 +77,7 @@ int chr;
 }
 #endif
 
+#ifdef L_rindex
 #undef rindex
 char *
 rindex(src, chr)
@@ -85,6 +86,7 @@ int chr;
 {
    return strrchr(src, chr);
 }
+#endif
 
 #ifdef L_remove
 #include <errno.h>
@@ -106,10 +108,7 @@ const char *src;
 #include <fcntl.h>
 
 int
-creat(file, mode)
-const char * file;
-mode_t mode;
+creat(const char *file, mode_t mode)
 {
    return open(file, O_TRUNC|O_CREAT|O_WRONLY, mode);
 }
-

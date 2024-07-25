@@ -1,9 +1,9 @@
 # Makefile of /libc/termcap module
-include $(TOPDIR)/libc/Makefile.inc
 
-#EMACS	= yes
+COMPILER ?= ia16
+LIB ?= out.a
 
-LIB	= out.a
+include $(TOPDIR)/libc/$(COMPILER).inc
 
 OBJS = \
 	entry.o \
@@ -15,16 +15,11 @@ OBJS = \
 	tgetst1.o \
 	tgetstr.o \
 	tgoto.o \
-	tp-main.o \
 	tparam.o \
 	tparam1.o \
 	tputs.o \
 	xmalloc.o \
 	xrealloc.o \
-
-ifeq "$(EMACS)" "yes"
-	CFLAGS += -Demcas
-endif
 
 #CFLAGS	+= -DDEBUG
 #CFLAGS	+= -DTIOCGWINSZ
@@ -33,9 +28,9 @@ endif
 
 all: $(LIB)
 
-$(LIB): $(OBJS)
+$(LIB): $(LIBOBJS)
 	$(RM) $@
-	$(AR) $(ARFLAGS_SUB) $@ $^
+	$(AR) $(ARFLAGS_SUB) $@ $(LIBOBJS)
 
 TC_OBJS = termcap.o
 

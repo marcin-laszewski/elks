@@ -26,6 +26,7 @@
 #include <linuxmt/debug.h>
 
 #include <arch/segment.h>
+#include <arch/irq.h>
 
 #define socki_lookup(inode)	(&inode->u.socket_i)
 
@@ -334,8 +335,6 @@ int sys_bind(int fd, struct sockaddr *umyaddr, int addrlen)
 
     return 0;
 }
-
-/*@-type@*/
 
 static struct file_operations socket_file_ops = {
     NULL,			/* lseek */

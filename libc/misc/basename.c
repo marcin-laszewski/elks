@@ -5,16 +5,15 @@
 /* POSIX implementation of basename(3) */
 
 char *
-basename (char *path)
+basename(char *path)
 {
-  static char *def = ".";
   char *base;
   int last;
 
   last = strlen (path) - 1;
 
   if (last == -1)
-    return def;
+    return ".";
 
   while (last > 0 && path[last] == '/')
     path[last--] = '\0';
@@ -22,7 +21,7 @@ basename (char *path)
   if (last == 0 && path[0] == '/')
     return path;
 
-  base = rindex (path, '/');
+  base = strrchr (path, '/');
 
   if (base != NULL)
       return base + 1;

@@ -34,9 +34,9 @@ struct drive_infot fd_types[] = {   /* AT/PS2 BIOS reported floppy formats*/
     {80, 15, 2, 512, 1},            /* 1.2M */
     {80,  9, 2, 512, 2},            /* 720k */
     {80, 18, 2, 512, 3},            /* 1.4M */
+    {80, 36, 2, 512, 4},            /* 2.88M */
     {80, 36, 2, 512, 5},            /* 2.88M */
-    {80, 36, 2, 512, 6},            /* 2.88M */
-    {77,  8, 2, 1024,7},            /* 1.232M PC/98 only */
+    {77,  8, 2, 1024,6},            /* 1.232M PC/98 only */
 };
 
 /* BIOS drive mappings */
@@ -386,6 +386,8 @@ void bios_switch_device98(int target, unsigned int device, struct drive_infot *d
         (device | (bios_drive_map[target + DRIVE_FD0] & 0x0F));
     if (device == 0x30)
         *drivep = fd_types[FD1440];
+    else if (device == 0x10)
+        *drivep = fd_types[FD720];
     else if (device == 0x90)
         *drivep = fd_types[FD1232];
 }

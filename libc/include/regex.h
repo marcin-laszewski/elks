@@ -1,3 +1,6 @@
+#ifndef	__REGEX_H
+#define	__REGEX_H
+
 /*
  * Definitions etc. for regexp(3) routines.
  *
@@ -17,7 +20,9 @@ typedef struct regexp {
 
 regexp *regcomp(char *exp);
 int regexec(regexp *prog, char *string);
-void regerror();
+void regerror(char *);
 
 int expandwildcards(char *name, int maxargc, char **retargv);
 void freewildcards(void);
+
+#endif

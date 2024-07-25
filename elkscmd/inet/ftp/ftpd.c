@@ -224,7 +224,7 @@ int do_active(char *client_ip, unsigned int client_port, unsigned int server_por
 
 	while ((bind(fd, (struct sockaddr*) &tempaddr, sizeof(tempaddr))) < 0) {
 		if (sockwait++ > 10 || errno != EADDRINUSE) {
-			printf("Bind: Could not connect on port %d\n", server_port-1);
+			printf("Bind: Could not connect on port %u\n", server_port-1);
     			perror("bind error");
 			return -1;
 		} 
@@ -617,12 +617,13 @@ int main(int argc, char **argv) {
 		} else 
 			myport = atoi(argv[0]);
 	}
+#if 0 /* FIXME temporarily remove as ftpd hangs on start with QEMU=1 */
 	if ((cp = getenv("QEMU")) != NULL) {
 		qemu = atoi(cp);
 		//printf("QEMU set to %d\n", qemu);
 		if (qemu) debug++;	//FIXME: Temporary - for debugging
 	}
-		
+#endif
 	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("socket error");
 		exit(1);
@@ -678,7 +679,7 @@ int main(int argc, char **argv) {
 	ret = sizeof(client);
 	while (1) {
 		if ((controlfd = accept(listenfd, (struct sockaddr *)&client, (unsigned int *)&ret)) < 0) {
-			perror("Accept error");
+			perror("accept error");
 			break;
 		}
 

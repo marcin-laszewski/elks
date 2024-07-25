@@ -26,7 +26,7 @@ static const int ansi_colors[16] = {30, 34, 32, 36, 31, 35, 33, 37,
 
 static char *attr_to_ansi(char *buf, unsigned int attr)
 {
-    sprintf(buf, "\e[%d;%dm",
+    sprintf(buf, "\033[%d;%dm",
         ansi_colors[attr & 0x0F], ansi_colors[(attr & 0x70) >> 4] + 10);
     return buf;
 }
@@ -41,7 +41,7 @@ static void display(void)
     unsigned short __far *chattr = MK_FP(0xb800, 0);
     char buf[16];
 
-    printf("\e[H");
+    fputs("\033[H", stdout);
     for (r=0; r<LINES; r++) {
         a = -1;
         for (c=0; c<COLS; c++) {
@@ -55,11 +55,9 @@ static void display(void)
                 fputs(buf, stdout);
             }
         }
-        if (r == LINES - 1)
-            printf("\r");
-        else printf("\n");
+        putc(r == LINES - 1 ? '\r' : '\n', stdout);
     }
-    printf("\e[1;0;0m");
+    fputs("\033[1;0;0m", stdout);
     fflush(stdout);
 }
 

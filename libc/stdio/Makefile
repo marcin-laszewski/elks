@@ -1,13 +1,15 @@
 # Makefile of /libc/stdio module
 
-include $(TOPDIR)/libc/Makefile.inc
+COMPILER ?= ia16
+LIB ?= out.a
+
+include $(TOPDIR)/libc/$(COMPILER).inc
 
 CFLAGS	+= -DL_ftell
 
 OBJS = \
 	init.o \
 	__fopen.o \
-	__io_list.o \
 	fclose.o \
 	fdopen.o \
 	fflush.o \
@@ -39,7 +41,6 @@ OBJS = \
 	stderr.o \
 	stdin.o \
 	stdout.o \
-	putchar.o \
 	ungetc.o \
 	vfprintf.o \
 	vfscanf.o \
@@ -50,11 +51,11 @@ OBJS = \
 	vsnprintf.o \
 	# end of list
 
-all: out.a
+all: $(LIB)
 
-out.a: $(OBJS)
+$(LIB): $(LIBOBJS)
 	$(RM) $@
-	$(AR) $(ARFLAGS_SUB) $@ $^
+	$(AR) $(ARFLAGS_SUB) $@ $(LIBOBJS)
 
 clean:
 	$(RM) *.[aod]

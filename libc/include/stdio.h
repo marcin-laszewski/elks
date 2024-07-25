@@ -1,8 +1,6 @@
-
 #ifndef __STDIO_H
 #define __STDIO_H
 
-#include <features.h>
 #include <sys/types.h>
 #include <stdarg.h>
 
@@ -68,10 +66,6 @@ extern FILE stdin[1];
 extern FILE stdout[1];
 extern FILE stderr[1];
 
-#ifdef __MSDOS__
-#define putc(c, fp) fputc(c, fp)
-#define getc(fp) fgetc(fp)
-#else
 #define putc(c, stream)	\
     (((stream)->bufpos >= (stream)->bufwrite) ? fputc((c), (stream))	\
                           : (unsigned char) (*(stream)->bufpos++ = (c))	)
@@ -79,7 +73,6 @@ extern FILE stderr[1];
 #define getc(stream)	\
   (((stream)->bufpos >= (stream)->bufread) ? fgetc(stream):		\
     (*(stream)->bufpos++))
-#endif
 
 #define putchar(c) putc((c), stdout)  
 #define getchar() getc(stdin)
@@ -109,10 +102,10 @@ int fclose(FILE*);
 int fflush(FILE*);
 char *fgets(char*, size_t, FILE*);
 
-ssize_t getdelim(char **__restrict lineptr, size_t *__restrict n,
-		int delimiter, register FILE *__restrict stream);
-ssize_t getline(char **__restrict lineptr, size_t *__restrict n,
-		FILE *__restrict stream);
+ssize_t getdelim(char ** restrict lineptr, size_t * restrict n,
+		int delimiter, register FILE * restrict stream);
+ssize_t getline(char ** restrict lineptr, size_t * restrict n,
+		FILE * restrict stream);
 
 FILE *fopen(const char*, const char*);
 FILE *fdopen(int, const char*);
@@ -120,6 +113,8 @@ FILE *freopen(const char*, const char*, FILE*);
 
 #ifdef __LIBC__
 FILE *__fopen(const char*, int, FILE*, const char*);
+void __stdio_init(void);        /* fwd decl for OWC __LINK_SYMBOL() */
+extern FILE *__IO_list;
 #endif
 
 int fputs(const char*, FILE*);

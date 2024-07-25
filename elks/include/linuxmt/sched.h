@@ -22,25 +22,24 @@ struct fs_struct {
     struct inode                *pwd;
 };
 
-struct mm_struct {
-    struct segment              *seg_code;
-    struct segment              *seg_data;
-};
-
 struct signal_struct {
     __kern_sighandler_t         handler;
     struct __kern_sigaction_struct action[NSIG];
 };
 
+/* Standard segment entry indices for a.out executables */
+#define SEG_CODE        0
+#define SEG_DATA        1
+
 struct task_struct {
 
 /* Executive stuff */
-    struct xregs                t_xregs;
-    __pptr                      t_enddata;
-    __pptr                      t_begstack;
-    __pptr                      t_endbrk;
-    __pptr                      t_endseg;
-    int                         t_minstack;
+    struct xregs                t_xregs;    /* CS and kernel SP */
+    segoff_t                    t_enddata;  /* start of heap = end of data+bss */
+    segoff_t                    t_endbrk;   /* current break (end of heap) */
+    segoff_t                    t_begstack; /* start SP, argc/argv strings above */
+    segoff_t                    t_endseg;   /* end of data seg (data+bss+heap+stack) */
+    segoff_t                    t_minstack; /* min stack size */
 
 /* Kernel info */
     pid_t                       pid;
@@ -64,7 +63,7 @@ struct task_struct {
     struct task_struct          *prev_run;
     struct file_struct          files;          /* File system structure */
     struct fs_struct            fs;             /* File roots */
-    struct mm_struct            mm;             /* Memory blocks */
+    struct segment              *mm[MAX_SEGS];  /* App code/data segments */
     struct tty                  *tty;
     struct task_struct          *p_parent;
     int                         exit_status;    /* process exit status*/
@@ -107,13 +106,15 @@ struct task_struct {
 #define DEPRECATED
 //#define DEPRECATED    __attribute__ ((deprecated))
 
-/* We use typedefs to avoid using struct foobar (*) */
-typedef struct task_struct __task, *__ptask;
-
-extern __task task[MAX_TASKS];
+extern struct task_struct *task;
+extern struct task_struct *current;
+extern struct task_struct *next_task_slot;
+extern int max_tasks;
+extern int task_slots_unused;
 
 extern volatile jiff_t jiffies; /* ticks updated by the timer interrupt*/
-extern __ptask current;
+extern pid_t last_pid;
+extern int intr_count;
 
 extern struct timeval xtime;
 extern jiff_t xtime_jiffies;
@@ -124,7 +125,7 @@ extern time_t current_time(void);
 #define time_after(a,b)         (((long)(b) - (long)(a) < 0))
 
 #define for_each_task(p) \
-        for (p = &task[0] ; p!=&task[MAX_TASKS]; p++ )
+        for (p = &task[0] ; p!=&task[max_tasks]; p++ )
 
 /* Scheduling and sleeping function prototypes */
 
@@ -167,6 +168,7 @@ extern unsigned int get_ustack(struct task_struct *,int);
 extern void put_ustack(register struct task_struct *,int,int);
 
 extern void tswitch(void);
+extern void setsp(void *);
 extern int run_init_process(const char *cmd);
 extern int run_init_process_sptr(const char *cmd, char *sptr, int slen);
 extern void ret_from_syscall(void);

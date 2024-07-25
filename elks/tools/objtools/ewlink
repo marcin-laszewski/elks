@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+#
+# ewlink - OpenWatcom owcc/wlink script for ELKS
+#
+# Usage: ewlink [-o binary] [--heap N] [--stack N] [-{owcc option}] file1.obj ...
+#   produces file1.os2 (for OS/2) and file1 (for ELKS)
+#
+# 3 Jun 2024 Initial version
+# 3 Jul 2024 Added -options for owcc and --options for wlink
+#
+set -e
+
+if [ -z "$TOPDIR" ]
+  then
+    echo "ELKS TOPDIR= environment variable not set"
+    exit
+fi
+
+if [ -z "$WATCOM" ]
+  then
+    echo "WATCOM= environment variable not set to compiler path"
+    exit
+fi
+
+ELKSLIBC=$TOPDIR/libc
+
+# Warning 1008: cannot open os2.lib: No such file or directory
+# Warning 1014: stack segment not found
+
+LDFLAGS="\
+    -bos2                           \
+    -s                              \
+    -fnostdlib                      \
+    -Wl,disable -Wl,1008            \
+    -Wl,disable -Wl,1014            \
+    -Wl,option -Wl,start=_start_    \
+    -Wl,option -Wl,dosseg           \
+    -Wl,option -Wl,stack=0x1000     \
+    -Wl,option -Wl,heapsize=0x1000  \
+    "
+
+while true; do
+  case "$1" in
+    --stack)
+        LDFLAGS="$LDFLAGS -Wl,option -Wl,stack=$2"
+        shift
+        shift ;;
+    --heap)
+        LDFLAGS="$LDFLAGS -Wl,option -Wl,heapsize=$2"
+        shift
+        shift ;;
+    -o)
+        OUT=$2
+        shift
+        shift ;;
+    -*)
+        LDFLAGS="$LDFLAGS $1"
+        shift ;;
+    *)  break ;;
+  esac
+done
+
+if [ $# -eq 0 ]
+  then
+    echo "Usage: ewlink [-o binary] [--heap N] [--stack N] [-{owcc option}] file1.obj ..."
+    exit
+fi
+
+if [ "$OUT" == "" ]
+  then
+    PROG=$1
+    OUT=${PROG%.obj}.os2
+fi
+
+echo owcc -v $LDFLAGS -o $OUT $@ $ELKSLIBC/libc.lib
+owcc -v $LDFLAGS -o $OUT $@ $ELKSLIBC/libc.lib
+
+# convert to ELKS a.out format
+#os2toelks -f elks -o $OUT $OUT.os2
+
+# dump OS/2 binary
+#os2dump $OUT.os2
+
+# copy to ELKS filesystem root user directory
+#cp $OUT $TOPDIR/elkscmd/rootfs_template/root

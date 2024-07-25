@@ -7,8 +7,8 @@
  * no more, no less.
  */
 
-#include <linuxmt/errno.h>
 #include <linuxmt/config.h>
+#include <linuxmt/errno.h>
 #include <linuxmt/socket.h>
 #include <linuxmt/fs.h>
 #include <linuxmt/sched.h>
@@ -18,6 +18,7 @@
 #include <linuxmt/debug.h>
 
 #include <arch/segment.h>
+#include <arch/irq.h>
 #include "af_unix.h"
 
 #ifdef CONFIG_UNIX

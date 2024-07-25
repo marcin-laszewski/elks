@@ -2,7 +2,7 @@
  *	Memory management support.
  */
 
-#include <linuxmt/types.h>
+#include <linuxmt/config.h>
 #include <linuxmt/sched.h>
 #include <linuxmt/mm.h>
 #include <linuxmt/errno.h>
@@ -118,11 +118,9 @@ static void seg_merge (segment_s * s1, segment_s * s2)
 segment_s * seg_alloc (segext_t size, word_t type)
 {
 	segment_s * seg = 0;
-	//lock_wait (&_seg_lock);
 	seg = seg_free_get (size, type);
 	if (seg && (type & SEG_FLAG_ALIGN1K))
 		seg->base += ((~seg->base + 1) & ((1024 >> 4) - 1));
-	//unlock_event (&_seg_lock);
 	return seg;
 }
 
@@ -131,8 +129,6 @@ segment_s * seg_alloc (segext_t size, word_t type)
 
 void seg_free (segment_s * seg)
 {
-	//lock_wait (&_seg_lock);
-
 	// Free segment will be inserted to free list:
 	//   - tail if merged to previous or next free segment
 	//   - head if still alone to increase 'exact hit'
@@ -169,8 +165,6 @@ void seg_free (segment_s * seg)
 	// Insert to free list head or tail
 
 	list_insert_after (i, &(seg->free));
-
-	//unlock_event (&_seg_lock);
 }
 
 
@@ -201,7 +195,6 @@ segment_s * seg_dup (segment_s * src)
 	segment_s * dst = seg_free_get (src->size, src->flags);
 	if (dst)
 		fmemcpyw(0, dst->base, 0, src->base, src->size << 3);
-
 	return dst;
 }
 
@@ -239,41 +232,41 @@ void mm_get_usage (unsigned int * pfree, unsigned int * pused)
 
 // User data segment functions
 
-int sys_brk(__pptr newbrk)
+int sys_brk(segoff_t newbrk)
 {
-    register __ptask currentp = current;
+	/***unsigned int memfree, memused;
+	mm_get_usage(&memfree, &memused);
+	printk("brk(%P): new %x, edat %x, ebrk %x, free %x sp %x, eseg %x, %d/%dK\n",
+		newbrk, current->t_enddata, current->t_endbrk,
+		current->t_regs.sp - current->t_endbrk,
+		current->t_regs.sp, current->t_endseg, memfree, memused);***/
 
-	/*printk("brk(%P): new %x, edat %x, ebrk %x, free %x sp %x, eseg %x, %d/%dK\n",
-		newbrk, currentp->t_enddata, currentp->t_endbrk,
-		currentp->t_regs.sp - currentp->t_endbrk,
-		currentp->t_regs.sp, currentp->t_endseg,
-		mm_get_usage(MM_MEM, SEG_FLAG_USED), mm_get_usage(MM_MEM, 0));*/
-
-    if (newbrk < currentp->t_enddata)
+    if (newbrk < current->t_enddata)
         return -ENOMEM;
 
-    if (currentp->t_begstack > currentp->t_endbrk) {				/* stack above heap?*/
-        if (newbrk > currentp->t_begstack - currentp->t_minstack) {
+    if (current->t_begstack > current->t_endbrk) {				/* stack above heap?*/
+        if (newbrk > current->t_begstack - current->t_minstack) {
 			printk("sys_brk(%d) fail: brk %x over by %u bytes\n",
-				currentp->pid, newbrk, newbrk - (currentp->t_begstack - currentp->t_minstack));
+				current->pid, newbrk, newbrk - (current->t_begstack - current->t_minstack));
             return -ENOMEM;
 		}
     }
 #ifdef CONFIG_EXEC_LOW_STACK
-    if (newbrk > currentp->t_endseg)
+    if (newbrk > current->t_endseg)
         return -ENOMEM;
 #endif
-    currentp->t_endbrk = newbrk;
+    current->t_endbrk = newbrk;
 
     return 0;
 }
 
 
-int sys_sbrk (int increment, __u16 * pbrk)
+int sys_sbrk (int increment, segoff_t *pbrk)
 {
-	__pptr brk = current->t_endbrk;		/* always return start of old break*/
+	segoff_t brk = current->t_endbrk;   /* always return start of old break*/
 	int err;
 
+	debug("sbrk incr %u pointer %04x curbreak %04x\n", increment, pbrk, brk);
 	err = verify_area(VERIFY_WRITE, pbrk, sizeof(*pbrk));
 	if (err)
 		return err;
@@ -295,7 +288,7 @@ int sys_fmemalloc(int paras, unsigned short *pseg)
 	err = verify_area(VERIFY_WRITE, pseg, sizeof(*pseg));
 	if (err)
 		return err;
-	seg = seg_alloc((segext_t)paras, SEG_FLAG_PROG);
+	seg = seg_alloc((segext_t)paras, SEG_FLAG_FDAT);
 	if (!seg)
 		return -ENOMEM;
 	seg->pid = current->pid;

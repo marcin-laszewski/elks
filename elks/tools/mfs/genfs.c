@@ -19,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#if __linux__
+#include <sys/sysmacros.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -30,12 +33,6 @@
 #include <fcntl.h>
 #include "minix_fs.h"
 #include "protos.h"
-
-#if __APPLE__
-#define MAJOR_SHIFT		24	/* OSX: right shift dev_t to get major device # */
-#else
-#define MAJOR_SHIFT		8
-#endif
 
 typedef unsigned short u16_t;
 typedef unsigned long u32_t;
@@ -407,22 +404,22 @@ compile_fs(struct minix_fs_dat *fs)
 				cmd_cp(fs, 3, av);
 			} else if (flags == S_IFCHR) {
 				if (opt_verbose) printf("mknod %s c %d %d\n", prefix+inode_build->path,
-					inode_build->dev >> MAJOR_SHIFT, inode_build->dev & 0xff);
+					major(inode_build->dev), minor(inode_build->dev));
 				av[0] = "mknod";
 				av[1] = prefix+inode_build->path;
 				av[2] = "c";
-				av[3] = major; sprintf(major, "%d", inode_build->dev >> MAJOR_SHIFT);
-				av[4] = minor; sprintf(minor, "%d", inode_build->dev & 0xff);
+				av[3] = major; sprintf(major, "%d", major(inode_build->dev));
+				av[4] = minor; sprintf(minor, "%d", minor(inode_build->dev));
 				av[5] = 0;
 				cmd_mknode(fs, 5, av);
 			} else if (flags == S_IFBLK) {
 				if (opt_verbose) printf("mknod %s b %d %d\n", prefix+inode_build->path,
-					inode_build->dev >> MAJOR_SHIFT, inode_build->dev & 0xff);
+					major(inode_build->dev), minor(inode_build->dev));
 				av[0] = "mknod";
 				av[1] = prefix+inode_build->path;
 				av[2] = "b";
-				av[3] = major; sprintf(major, "%d", inode_build->dev >> MAJOR_SHIFT);
-				av[4] = minor; sprintf(minor, "%d", inode_build->dev & 0xff);
+				av[3] = major; sprintf(major, "%d", major(inode_build->dev));
+				av[4] = minor; sprintf(minor, "%d", minor(inode_build->dev));
 				av[5] = 0;
 				cmd_mknode(fs, 5, av);
 			} else if (flags == S_IFLNK) {
@@ -469,8 +466,11 @@ void cmd_genfs(char *filename, int argc,char **argv) {
   if (p)
 	  p++;
   else p = dirname;
-  prefix = p - dirname + strlen(p);		/* skip template dir*/
-  if (opt_verbose) printf("Generating filesystem from %s\n", dirname);
+  prefix = p - dirname;                         /* keep template dir if starts with ./ */
+  if (prefix != 2 || dirname[0] != '.')
+        prefix = p - dirname + strlen(p);       /* skip template dir*/
+  if (opt_verbose) printf("Generating filesystem from %s to /%s\n",
+        dirname, dirname+prefix);
   numblocks = 2;			/* root inode and first mkdir*/
   list_init(&inodes);
   inode_build_t  *root_node = inode_alloc(NULL, dirname);
@@ -508,20 +508,15 @@ void cmd_genfs(char *filename, int argc,char **argv) {
  */
 void cmd_addfs(char *filename, int argc,char **argv) {
   struct minix_fs_dat *fs;
-  char *p;
   int err;
-  char dirname[256];
+  char *dirname;
 
   argv++; argc--;
   if (argc != 2) fatalmsg("Usage: addfs <file_of_filenames> <root_template>");
 
-  strcpy(dirname, argv[1]);
-  p = strrchr(dirname, '/');
-  if (p)
-	  p++;
-  else p = dirname;
-  prefix = p - dirname + strlen(p);		/* skip template dir*/
-  if (opt_verbose) printf("Adding files from %s\n", dirname);
+  dirname = argv[1];
+  prefix = 0;
+  if (opt_verbose) printf("Adding files from %s to %s\n", argv[0], dirname);
   numblocks = 2;			/* root inode and first mkdir*/
   list_init(&inodes);
   inode_build_t  *root_node = inode_alloc(NULL, dirname);

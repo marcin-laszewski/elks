@@ -1,7 +1,7 @@
 #ifndef __STRING_H
 #define __STRING_H
 
-#include <stddef.h>
+#include <sys/types.h>
 
 /* Basic string functions */
 
@@ -56,8 +56,9 @@ char *strfry(char *);
 
 void bzero(void * s, size_t n);
 
-// TODO: this is removed in POSIX-1.2008
-// TODO: replace by memcpy or memmove
+/* TODO: this is removed in POSIX-1.2008
+ * TODO: replace by memcpy or memmove
+ */
 #define bcopy(s, d, n) memcpy((d), (s), (n))
 
 #endif

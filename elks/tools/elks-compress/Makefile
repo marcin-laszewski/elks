@@ -4,7 +4,7 @@ OBJS	= elks-compress.o
 
 all: $(OUTS)
 
-../bin/elks-compress: minix.h $(OBJS)
+../bin/elks-compress: $(OBJS)
 	$(CC) -o ../bin/elks-compress $(CFLAGS) $(OBJS)
 
 ../bin/exomizer: exomizer/src/exomizer

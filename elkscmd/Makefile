@@ -28,8 +28,7 @@ include $(CONFIG)
 
 # All subdirectories to build & clean
 
-# TODO: broken command compilations: byacc m4 xvi
-# unused commands but working compilations: mtools nano prems
+# unused commands but working compilations: nano levee
 SUBDIRS =       \
 	lib         \
 	advent      \
@@ -37,12 +36,13 @@ SUBDIRS =       \
 	basic       \
 	bc          \
 	busyelks    \
+	debug       \
 	disk_utils  \
+	fsck_dos    \
 	elvis	    \
 	file_utils  \
 	inet        \
 	ktcp        \
-	levee       \
 	minix1      \
 	minix2      \
 	minix3      \

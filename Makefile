@@ -10,6 +10,7 @@ endif
 
 include $(TOPDIR)/Make.defs
 
+<<<<<<< HEAD
 ARCH86	= elks/arch/i86/
 LIB86	= $(ARCH86)/lib/lib86.a
 ELKSIMG	= $(ARCH86)/boot/Image
@@ -337,7 +338,8 @@ $(LIB86):
 clean: libc-clean libc-uninstall image-clean boot-clean
 	$(MAKE) -C elks clean
 	$(MAKE) -C elkscmd clean
-ifneq ($(shell uname), Darwin)
+	$(MAKE) -C image clean
+ifeq ($(shell uname), Linux)
 	$(MAKE) -C elksemu clean
 endif
 	@echo
@@ -387,3 +389,7 @@ menuconfig: elks/arch/i86/drivers/char/KeyMaps/config.in kconfig
 .config:
 	@echo 'No "$@". Run "make config" or "make menuconfig".'
 	@false
+
+.PHONY: tags
+tags:
+	ctags -R --exclude=cross --exclude=elkscmd .

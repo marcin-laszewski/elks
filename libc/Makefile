@@ -1,4 +1,4 @@
-# Makefile of ELKS C Library
+# ia16-elf-gcc Makefile for ELKS C Library
 
 %.o: %.S
 %.o: %.asm
@@ -16,6 +16,7 @@ INCLUDES = \
  $(TOPDIR)/elks/include \
 
 PREFIX ?= ia16-elf-
+include ia16.inc
 
 CC=$(PREFIX)gcc
 AS=$(PREFIX)as
@@ -571,8 +572,22 @@ TARGETS_CLEAN	= $(addprefix clean-,$(TARGETS_NAME))
 TARGETS_INSTALL	= $(addprefix install-,$(TARGETS_NAME))
 TARGETS_UNINSTALL	= $(addprefix uninstall-,$(TARGETS_NAME))
 
-TARGETS	?= $(TARGETS_NAME)
-LIBS	= $(addprefix $(BUILD)/,$(addsuffix /libc.a,$(TARGETS)))
+# `ia16-elf-ar -M' errors out if the path argument to `CREATE' contains any
+# weird characters such as `~'.  This caused problems when building elks-libc
+# pre-releases on launchpad.net.  To work around this, make all paths in the
+# `ia16-elf-ar -M' MRI script relative to $(TOPDIR).
+$(LIBC): $(SUBLIBSINMULTILIB)
+	mkdir -p $(@D)
+	$(RM) -r $@.tmp
+	set -e; \
+	cd $(TOPDIR); \
+	( \
+		echo CREATE $(patsubst $(TOPDIR)/%,%,$(abspath $@.tmp)); \
+		for s in $(patsubst $(TOPDIR)/%,%,$(abspath $^)); \
+			do echo ADDLIB "$$s"; done; \
+		echo SAVE \
+	) | $(AR) -M
+	mv $@.tmp $@
 
 TABS = \
  $(DESTDIR)/share/misc/elks/call_tab.v \

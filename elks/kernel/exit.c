@@ -9,9 +9,6 @@
 #include <linuxmt/mm.h>
 #include <linuxmt/debug.h>
 
-extern int task_slots_unused;
-extern struct task_struct *next_task_slot;
-
 static void reparent_children(void)
 {
     register struct task_struct *p;
@@ -96,6 +93,7 @@ int sys_wait4(pid_t pid, int *status, int options, void *usage)
 
 void do_exit(int status)
 {
+    int i;
     struct task_struct *parent;
 
     debug_wait("EXIT(%P) status %d\n", status);
@@ -107,33 +105,16 @@ void do_exit(int status)
 
     /* Let go of the process */
     current->state = TASK_EXITING;
-    if (current->mm.seg_code)
-        seg_put(current->mm.seg_code);
-    if (current->mm.seg_data)
-        seg_put(current->mm.seg_data);
-    current->mm.seg_code = current->mm.seg_data = 0;
+    for (i = 0; i < MAX_SEGS; i++) {
+        if (current->mm[i])
+            seg_put(current->mm[i]);
+        current->mm[i] = 0;
+    }
 
     /* free program allocated memory */
     seg_free_pid(current->pid);
 
-#if BLOAT
-    /* Keep all of the family stuff straight */
-    struct task_struct *task;
-    if ((task = current->p_prevsib)) {
-        task->p_nextsib = current->p_nextsib;
-    }
-    if ((task = current->p_nextsib)) {
-        task->p_prevsib = current->p_prevsib;
-    }
-
-    /* Ack. I hate repeating code like this */
-    if ((parent = current->p_parent)->p_child == current) {
-        if ((task = current->p_prevsib) || (task = current->p_nextsib))
-            parent->p_child = task;
-    }
-#else
     parent = current->p_parent;
-#endif
 
     /* UN*X process take their children out with them...
      * I'm not going to implement that for 0.0.51 because we don't
