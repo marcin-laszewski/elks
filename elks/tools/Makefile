@@ -1,4 +1,4 @@
-OUTS = mfs mfsck mkromfs setboot objdump86 elf2elks elks-compress eman
+OUTS = mfs mfsck mkromfs setboot objtools elf2elks elks-compress eman
 CLEANS = $(addprefix clean-,$(OUTS))
 
 all: $(OUTS)
