@@ -34,6 +34,7 @@ file_utils/rmdir \
 file_utils/split \
 file_utils/sync \
 file_utils/touch \
+fsck_dos/fsck-dos \
 inet/ftp/ftp \
 inet/ftp/ftpd \
 inet/httpd/httpd \
