@@ -60,4 +60,4 @@ $(LIB): $(LIBOBJS)
 
 .PHONY: clean
 clean:
-	$(RM) *.[aod]
+	$(RM) $(OBJS)
