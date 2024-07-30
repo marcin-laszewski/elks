@@ -51,11 +51,13 @@ OBJS = \
 	vsnprintf.o \
 	# end of list
 
+.PHONY: all
 all: $(LIB)
 
 $(LIB): $(LIBOBJS)
 	$(RM) $@
 	$(AR) $(ARFLAGS_SUB) $@ $(LIBOBJS)
 
+.PHONY: clean
 clean:
 	$(RM) *.[aod]
