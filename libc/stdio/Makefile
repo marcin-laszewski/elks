@@ -58,6 +58,10 @@ $(LIB): $(LIBOBJS)
 	$(RM) $@
 	$(AR) $(ARFLAGS_SUB) $@ $(LIBOBJS)
 
+.PHONY: distclean
+distclean: clean
+	$(RM) $(LIB) $(subst .o,.d,$(OBJS))
+
 .PHONY: clean
 clean:
 	$(RM) $(OBJS)
