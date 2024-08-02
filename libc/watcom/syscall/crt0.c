@@ -12,15 +12,7 @@
 
 /* Watcom extern code refs are sym_, extern data refs are _sym */
 
-/* external references created by Watcom C compilation - unused */
-int _argc;              /* with declaration of main() */
-int _8087;              /* when floating point seen */
-
-/* cstart_ is an external reference created by Watcom C, pulls in asm/segments.asm */
-#pragma aux cstart_ "_*" modify [ bx cx dx si di ]
-extern void cstart_(void);
-
-static noreturn void sys_exit(int status);
+extern void sys_exit(int status);
 #pragma aux sys_exit =         \
     "xchg ax, bx"           \
     "xor ax, ax"            \
@@ -33,7 +25,6 @@ noreturn void _exit(int status)
     sys_exit(status);
 }
 
-#pragma aux exit modify [ bx cx dx si di ]
 noreturn void exit(int status)
 {
     __FiniRtns();
@@ -46,7 +37,6 @@ noreturn void exit(int status)
  *
  * main(ac, av) called by AX, DX (small/medium) or AX, CX:BX (compact/large) model
  */
-#pragma aux main "*" modify [ bx cx dx si di ]
 extern int main(int argc, char **argv);
 
 /* global variables initialized at C startup */
@@ -65,8 +55,8 @@ unsigned int stackavail(void)
     return (_SP() - __stacklow);
 }
 
-#pragma aux premain "*" modify [ bx cx dx si di ]
-#if defined(__SMALL__) || defined(__MEDIUM__)
+#if defined(__SMALL__) || defined(__MEDIUM__)   /* near data models */
+/* no argv/environ rewrite */
 static noreturn void premain(void)
 {
     __InitRtns();
@@ -100,7 +90,7 @@ static noreturn void premain(char __near *newsp, char __near *oldsp, int bx, int
 
 /* DX contains program stack size at startup */
 noreturn static void _crt0(void);
-#if defined(__SMALL__) || defined(__MEDIUM__)
+#if defined(__SMALL__) || defined(__MEDIUM__)   /* near data models */
 #pragma aux _crt0 =         \
     "mov ax,sp"             \
     "sub ax,dx"             \
@@ -119,7 +109,9 @@ noreturn static void _crt0(void);
     "mov word ptr __program_filename, bx"       \
     "push ax"               \
     "call premain";
+
 #else
+
 #pragma aux _crt0 =         \
     "mov ax,sp"             \
     "sub ax,dx"             \
@@ -155,5 +147,14 @@ noreturn static void _crt0(void);
     "call premain";
 #endif
 
-/* actual program entry point */
+#if defined(__SMALL__) || defined(__COMPACT__)  /* near code models */
+/* jumped from _start for prevention of zero near function address */
+#pragma aux _start_crt0 "*"
+noreturn void _start_crt0(void) { _crt0(); }
+
+#else
+
+/* actual program entry point for far code (medium and large) models */
+#pragma aux _start "*"
 noreturn void _start(void) { _crt0(); }
+#endif

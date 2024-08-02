@@ -1,30 +1,32 @@
 # Makefile include for OpenWatcom build
 
-ifeq "$(WATDIR)" ""
-$(error Must set WATDIR environment variable to top of OpenWatcom C directory)
+ifeq "$(WATCOM)" ""
+$(error WATCOM environment variable not set)
 endif
 
 INCLUDES = -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
-INCLUDES += -I$(WATDIR)/bld/hdr/dos/h
+INCLUDES += -I$(WATCOM)/h
 DEFINES = -D__LIBC__
 LIBOBJS=$(OBJS:.o=.obj)
 
 include $(TOPDIR)/libc/watcom.model
 
 CARCH =\
-    -bos2                           \
+    -bnone                          \
     -mcmodel=$(MODEL)               \
     -march=i86                      \
     -std=c99                        \
     -fno-stack-check                \
-    -Wc,-wcd=303                    \
     -Wc,-fpi87                      \
     -Wc,-zev                        \
+    -Wc,-zls                        \
+    -Wc,-x                          \
+    -Wc,-wcd=303                    \
     -fnostdlib                      \
-    -v                              \
 
 AARCH=\
     -m$(MODEL)                      \
+    -zq                             \
     -0                              \
     -fp0                            \
     -fpi87                          \
@@ -35,10 +37,10 @@ AS=wasm
 
 CFLAGS=$(CARCH) $(INCLUDES) $(DEFINES) -Wall -Os
 ASFLAGS=$(AARCH)
-ARFLAGS_SUB=-n -b -fo
+ARFLAGS_SUB=-n -q -b -fo
 
 %.obj: %.c
-	$(CC) $(CFLAGS) -c -o $*.obj $<
+	$(CC) -c $(CFLAGS) -o $*.obj $<
 
 %.obj: %.asm
 	$(AS) $(ASFLAGS) $*.asm
