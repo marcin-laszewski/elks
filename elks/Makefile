@@ -100,7 +100,7 @@ kernel/kernel.a:	include/linuxmt/compiler-generated.h
 	${MAKE} -C kernel kernel.a
 
 tools:
-	${MAKE} -C tools all CC=cc CFLAGS= AR=ar
+	${MAKE} -C tools all CC=cc 'CFLAGS=-Wall -I../../include' AR=ar
 	-$(RM) include/linuxmt/compiler-generated.h
 	-$(RM) kernel/version.o
 
