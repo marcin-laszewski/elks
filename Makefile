@@ -303,6 +303,11 @@ $(ELKSIMG): .config include/autoconf.h
 	@echo 'ELKSIMG	$@'
 	$(V)$(MAKE) -C elks all
 
+kimage: kernel image
+
+kernel:
+	$(MAKE) -C elks
+
 kclean:
 	$(MAKE) -C elks kclean
 
