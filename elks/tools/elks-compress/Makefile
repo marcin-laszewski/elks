@@ -1,4 +1,5 @@
 CFLAGS	+= -Wall
+CFLAGS	+= -I../../include
 OUTS	= ../bin/elks-compress ../bin/exomizer
 OBJS	= elks-compress.o
 
